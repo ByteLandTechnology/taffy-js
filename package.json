@@ -30,9 +30,11 @@
   "scripts": {
     "build": "wasm-pack build --release --target web",
     "build:dev": "wasm-pack build --dev --target web",
-    "test": "wasm-pack test --node"
+    "test": "wasm-pack test --node",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
     "wasm-pack": "^0.13.1"
   },
   "engines": {
