@@ -229,6 +229,7 @@ const style = new Style();
 | `min_size`     | `{ width, height }` | Minimum size constraints |
 | `max_size`     | `{ width, height }` | Maximum size constraints |
 | `aspect_ratio` | `number?`           | Width-to-height ratio    |
+| `box_sizing`   | `BoxSizing`         | Size calculation mode    |
 
 #### Spacing
 
@@ -414,6 +415,13 @@ Overflow.Visible; // Content not clipped
 Overflow.Hidden; // Content clipped
 Overflow.Scroll; // Always show scrollbars
 Overflow.Auto; // Show scrollbars when needed
+```
+
+#### BoxSizing
+
+```typescript
+BoxSizing.BorderBox; // Include padding/border in size (default)
+BoxSizing.ContentBox; // Size is content only
 ```
 
 ---

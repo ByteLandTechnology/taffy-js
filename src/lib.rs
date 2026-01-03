@@ -237,6 +237,23 @@ impl From<taffy::style::Overflow> for Overflow {
     fn from(val: taffy::style::Overflow) -> Self { match val { taffy::style::Overflow::Visible => Overflow::Visible, taffy::style::Overflow::Hidden => Overflow::Hidden, taffy::style::Overflow::Scroll => Overflow::Scroll, taffy::style::Overflow::Clip => Overflow::Hidden } }
 }
 
+/// Box sizing enum
+/// 
+/// Controls how the total width and height of an element is calculated.
+/// 
+/// # Variants
+/// - `BorderBox`: Width and height include content, padding, and border (default)
+/// - `ContentBox`: Width and height include only the content
+#[wasm_bindgen]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum BoxSizing { BorderBox = 0, ContentBox = 1 }
+impl From<BoxSizing> for taffy::style::BoxSizing {
+    fn from(val: BoxSizing) -> Self { match val { BoxSizing::BorderBox => taffy::style::BoxSizing::BorderBox, BoxSizing::ContentBox => taffy::style::BoxSizing::ContentBox } }
+}
+impl From<taffy::style::BoxSizing> for BoxSizing {
+    fn from(val: taffy::style::BoxSizing) -> Self { match val { taffy::style::BoxSizing::BorderBox => BoxSizing::BorderBox, taffy::style::BoxSizing::ContentBox => BoxSizing::ContentBox } }
+}
+
 // =============================================================================
 // Data Transfer Objects (DTOs)
 // =============================================================================
@@ -636,6 +653,16 @@ impl Style {
     /// Sets the overflow behavior. Accepts {x: Overflow, y: Overflow}.
     #[wasm_bindgen(setter)] 
     pub fn set_overflow(&mut self, val: JsValue) { if let Ok(o) = serde_wasm_bindgen::from_value(val) { self.inner.overflow = o; } }
+
+    /// Gets the box sizing mode (BorderBox or ContentBox).
+    #[wasm_bindgen(getter)]
+    pub fn box_sizing(&self) -> BoxSizing { self.inner.box_sizing.into() }
+
+    /// Sets the box sizing mode.
+    /// - `BoxSizing.BorderBox`: Width and height include content, padding, and border (default)
+    /// - `BoxSizing.ContentBox`: Width and height include only the content
+    #[wasm_bindgen(setter)]
+    pub fn set_box_sizing(&mut self, val: BoxSizing) { self.inner.box_sizing = val.into(); }
 
     /// Gets the flex-basis as a JsDimension (Length, Percent, or Auto).
     /// Flex-basis defines the initial main size before grow/shrink.
