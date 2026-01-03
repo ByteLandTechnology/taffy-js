@@ -1,19 +1,19 @@
-# Taffy WebAssembly Bindings
+# Taffy-JS: WebAssembly Bindings for Taffy Layout Engine
 
 > **High-performance Flexbox and CSS Grid layout for JavaScript/TypeScript, powered by Rust and WebAssembly.**
 
 ![License](https://img.shields.io/npm/l/taffy-js?style=flat-square) ![Version](https://img.shields.io/npm/v/taffy-js?style=flat-square) ![WASM](https://img.shields.io/badge/platform-wasm-blueviolet?style=flat-square)
 
-**Taffy** is a generic, high-performance UI layout library written in Rust. This package (`taffy-js`) provides WebAssembly bindings, allowing you to use Taffy's standards-compliant Flexbox and Grid algorithms directly in your web or Node.js applications with near-native performance.
+**Taffy** is a high-performance UI layout library written in Rust. This package (`taffy-js`) provides WebAssembly bindings, enabling JavaScript/TypeScript applications to use standards-compliant Flexbox, CSS Grid, and Block layout algorithms with near-native performance.
 
 ## ✨ Features
 
-- **🚀 High Performance**: Leverages the speed of Rust and WebAssembly for complex layout computations.
-- **📦 Tiny Footprint**: Highly optimized WASM binary size.
-- **🎨 Modern Layouts**: Full support for **Flexbox** and **CSS Grid** specifications.
-- **🛠 Framework Agnostic**: Use it with React, Vue, Svelte, vanilla JS, or even in Node.js for server-side layout calculation.
-- **🔒 Type-Safe**: Fully typed API with TypeScript definitions included.
-- **🐛 Debug Mode**: Optional verbose logging for debugging layout issues.
+- 🚀 **High Performance** – Rust + WebAssembly for complex layout computations
+- 📦 **Tiny Footprint** – Optimized WASM binary size
+- 🎨 **Modern Layouts** – Full Flexbox, CSS Grid, and Block layout support
+- 🛠 **Framework Agnostic** – Works with React, Vue, Svelte, vanilla JS, Node.js
+- 🔒 **Type-Safe** – Full TypeScript definitions included
+- 📐 **Custom Measurement** – Support for text measurement via callback functions
 
 ## 📦 Installation
 
@@ -21,415 +21,463 @@
 npm install taffy-js
 ```
 
-> **Note**: This package relies on WebAssembly. Ensure your runtime (modern browser or Node.js) supports WASM.
+> **Note**: Requires a runtime that supports WebAssembly (all modern browsers and Node.js 12+).
 
 ## 🚀 Quick Start
 
-### Functional API
-
 ```typescript
 import init, {
-  new_leaf,
-  new_with_children,
-  compute_layout,
-  get_layout,
+  TaffyTree,
+  Style,
   Display,
   FlexDirection,
   AlignItems,
   JustifyContent,
 } from "taffy-js";
 
-async function run() {
-  // 1. Initialize the WASM module
+async function main() {
+  // 1. Initialize WASM module
   await init();
 
-  // 2. Define Styles
-  const boxStyle = {
-    display: Display.Flex,
-    width: { value: 100, unit: "Pixels" },
-    height: { value: 100, unit: "Pixels" },
-    justify_content: JustifyContent.Center,
-    align_items: AlignItems.Center,
-  };
+  // 2. Create tree and styles
+  const tree = new TaffyTree();
 
-  const rootStyle = {
-    display: Display.Flex,
-    width: { value: 500, unit: "Pixels" },
-    height: { value: 500, unit: "Pixels" },
-    flex_direction: FlexDirection.Row,
-    justify_content: JustifyContent.SpaceAround,
-    align_items: AlignItems.Center,
-  };
+  const rootStyle = new Style();
+  rootStyle.display = Display.Flex;
+  rootStyle.flex_direction = FlexDirection.Row;
+  rootStyle.justify_content = JustifyContent.SpaceAround;
+  rootStyle.align_items = AlignItems.Center;
+  rootStyle.size = { width: { Length: 500 }, height: { Length: 400 } };
 
-  // 3. Create Tree Nodes
-  const child1 = new_leaf(boxStyle);
-  const child2 = new_leaf(boxStyle);
-  const root = new_with_children(rootStyle, [child1, child2]);
+  const childStyle = new Style();
+  childStyle.size = { width: { Length: 100 }, height: { Length: 100 } };
 
-  // 4. Compute Layout
-  compute_layout(root, { width: 500, height: 500 });
+  // 3. Build the tree
+  const child1 = tree.newLeaf(childStyle);
+  const child2 = tree.newLeaf(childStyle);
+  const root = tree.newWithChildren(rootStyle, [child1, child2]);
 
-  // 5. Retrieve Results
-  const rootLayout = get_layout(root);
-  const child1Layout = get_layout(child1);
-  const child2Layout = get_layout(child2);
+  // 4. Compute layout
+  tree.computeLayout(root, {
+    width: { Definite: 500 },
+    height: { Definite: 400 },
+  });
 
-  console.log("Root:", rootLayout); // { x: 0, y: 0, width: 500, height: 500 }
-  console.log("Child 1:", child1Layout); // { x: ..., y: ..., width: 100, height: 100 }
-  console.log("Child 2:", child2Layout); // { x: ..., y: ..., width: 100, height: 100 }
+  // 5. Read results
+  console.log("Root:", tree.getLayout(root));
+  console.log("Child 1:", tree.getLayout(child1));
+  console.log("Child 2:", tree.getLayout(child2));
 }
 
-run();
-```
-
-### Object-Oriented API (Yoga-like)
-
-The library also provides an OO wrapper for a more intuitive, Yoga-style experience:
-
-```typescript
-import init, {
-  TaffyNode,
-  Display,
-  FlexDirection,
-  Edge,
-  Gutter,
-} from "taffy-js";
-
-async function run() {
-  await init();
-
-  // Create nodes using the OO API
-  const root = new TaffyNode({});
-  root.setDisplay(Display.Flex);
-  root.setFlexDirection(FlexDirection.Column);
-  root.setWidth(400);
-  root.setHeight(400);
-  root.setPadding(Edge.All, 10);
-  root.setGap(Gutter.Row, 8);
-
-  const child1 = new TaffyNode({});
-  child1.setHeight(100);
-  child1.setFlexGrow(1);
-
-  const child2 = new TaffyNode({});
-  child2.setHeight(50);
-
-  // Build the tree
-  root.addChild(child1);
-  root.addChild(child2);
-
-  // Compute layout
-  root.computeLayout({ width: 400, height: 400 });
-
-  // Get results
-  const layout = root.getLayout();
-  console.log("Root layout:", layout);
-  console.log("Child1 layout:", child1.getLayout());
-  console.log("Child2 layout:", child2.getLayout());
-
-  // Cleanup (optional - nodes are automatically freed when dropped)
-  root.free();
-}
-
-run();
+main();
 ```
 
 ## 📐 Architecture
 
-`taffy-js` acts as a thin wrapper around the [Taffy](https://github.com/DioxusLabs/taffy) Rust crate.
+The library is organized into four main components:
 
-1.  **Node Tree**: You build a flat tree of nodes in the WASM memory space using integer IDs (`u64`).
-2.  **Style Transfer**: Styles are serialized from JS objects to Rust structs via `serde-wasm-bindgen`.
-3.  **Computation**: Rust runs the layout algorithms (Flexbox/Grid/Block).
-4.  **Readout**: You query the final computed geometry (x, y, width, height) back to JS.
+| Component     | Description                                                                           |
+| :------------ | :------------------------------------------------------------------------------------ |
+| **Enums**     | CSS layout enum types (Display, Position, FlexDirection, FlexWrap, AlignItems, etc.)  |
+| **DTOs**      | Data Transfer Objects for JS ↔ Rust serialization (JsDimension, JsSize, JsRect, etc.) |
+| **Style**     | Node style configuration with getter/setter methods for all CSS layout properties     |
+| **TaffyTree** | Layout tree manager for node creation, tree manipulation, and layout computation      |
+
+### How It Works
+
+1. **Create Tree** – Instantiate a `TaffyTree` to manage layout nodes
+2. **Define Styles** – Create `Style` objects and set CSS layout properties
+3. **Build Nodes** – Use `newLeaf()` or `newWithChildren()` to create nodes
+4. **Compute Layout** – Call `computeLayout()` on the root node
+5. **Read Results** – Use `getLayout()` to retrieve computed positions and sizes
+
+---
 
 ## 📚 API Reference
 
-### Lifecycle
+### TaffyTree Class
 
-| Function  | Description                                                                     |
-| :-------- | :------------------------------------------------------------------------------ |
-| `init()`  | Initializes the WASM module. Must be awaited before calling any other function. |
-| `clear()` | Clears all nodes from the layout tree, resetting to empty state.                |
+The main entry point for layout computation.
 
-### Node Management (Functional API)
+#### Constructors
 
-| Function            | Signature                                      | Description                             |
-| :------------------ | :--------------------------------------------- | :-------------------------------------- |
-| `new_leaf`          | `(style: Style) -> number`                     | Creates a leaf node (no children).      |
-| `new_with_children` | `(style: Style, children: number[]) -> number` | Creates a node containing child nodes.  |
-| `add_child`         | `(parent: number, child: number) -> void`      | Appends a child to a parent.            |
-| `remove_child`      | `(parent: number, child: number) -> void`      | Removes a specific child from a parent. |
-| `set_children`      | `(parent: number, children: number[]) -> void` | Replaces all children of a node.        |
-| `remove_node`       | `(node: number) -> void`                       | Deletes a node and frees its memory.    |
-| `get_children`      | `(parent: number) -> number[]`                 | Returns an array of child node IDs.     |
-| `get_parent`        | `(node: number) -> number \| null`             | Returns the parent node ID, or null.    |
+| Method                      | Description                                              |
+| :-------------------------- | :------------------------------------------------------- |
+| `new TaffyTree()`           | Creates a new empty layout tree                          |
+| `TaffyTree.withCapacity(n)` | Creates a tree with pre-allocated capacity for `n` nodes |
 
-### Layout & Style (Functional API)
+#### Configuration
 
-| Function         | Signature                                       | Description                                          |
-| :--------------- | :---------------------------------------------- | :--------------------------------------------------- |
-| `set_style`      | `(node: number, style: Style) -> void`          | Updates the style properties of a node.              |
-| `compute_layout` | `(root: number, space: AvailableSpace) -> void` | Triggers the layout calculation algorithm.           |
-| `get_layout`     | `(node: number) -> Layout`                      | Returns `{x, y, width, height}` for a node.          |
-| `mark_dirty`     | `(node: number) -> void`                        | Manually marks a node as dirty, requiring re-layout. |
-| `node_count`     | `() -> number`                                  | Returns the total number of nodes in the tree.       |
+| Method              | Description                                              |
+| :------------------ | :------------------------------------------------------- |
+| `enableRounding()`  | Enables rounding layout values to whole pixels (default) |
+| `disableRounding()` | Disables rounding for sub-pixel precision                |
 
-### Dimension Helpers
+#### Node Creation
 
-| Function    | Signature                                           | Description                             |
-| :---------- | :-------------------------------------------------- | :-------------------------------------- |
-| `px`        | `(value: number) -> Dimension`                      | Creates a pixel dimension.              |
-| `percent`   | `(value: number) -> Dimension`                      | Creates a percentage dimension.         |
-| `auto`      | `() -> Dimension`                                   | Creates an auto dimension.              |
-| `dimension` | `(value: number, unit: DimensionUnit) -> Dimension` | Creates a dimension with explicit unit. |
+| Method               | Signature                                     | Description                               |
+| :------------------- | :-------------------------------------------- | :---------------------------------------- |
+| `newLeaf`            | `(style: Style) → number`                     | Creates a leaf node (no children)         |
+| `newLeafWithContext` | `(style: Style, context: any) → number`       | Creates a leaf with attached context data |
+| `newWithChildren`    | `(style: Style, children: number[]) → number` | Creates a container node with children    |
 
-### TaffyNode Class (OO API)
+#### Style Management
 
-The `TaffyNode` class provides a Yoga-like object-oriented interface:
+| Method     | Signature                             | Description                          |
+| :--------- | :------------------------------------ | :----------------------------------- |
+| `setStyle` | `(node: number, style: Style) → void` | Updates a node's style (marks dirty) |
+| `getStyle` | `(node: number) → Style`              | Returns a copy of the node's style   |
 
-#### Constructor & Lifecycle
+#### Tree Operations
 
-| Method                 | Description                                                   |
-| :--------------------- | :------------------------------------------------------------ |
-| `new TaffyNode(style)` | Creates a new node with the given style.                      |
-| `free()`               | Explicitly frees the node. Nodes are also auto-freed on drop. |
+| Method                | Signature                         | Description                    |
+| :-------------------- | :-------------------------------- | :----------------------------- |
+| `addChild`            | `(parent, child) → void`          | Appends a child to a parent    |
+| `removeChild`         | `(parent, child) → number`        | Removes and returns the child  |
+| `removeChildAtIndex`  | `(parent, index) → number`        | Removes child at index         |
+| `insertChildAtIndex`  | `(parent, index, child) → void`   | Inserts child at index         |
+| `replaceChildAtIndex` | `(parent, index, child) → number` | Replaces and returns old child |
+| `setChildren`         | `(parent, children[]) → void`     | Replaces all children          |
+| `remove`              | `(node) → number`                 | Removes node from tree         |
+| `clear`               | `() → void`                       | Removes all nodes              |
 
-#### Style Methods
+#### Tree Queries
 
-| Method                        | Description                                    |
-| :---------------------------- | :--------------------------------------------- |
-| `setStyle(style)`             | Updates the full style object.                 |
-| `setDisplay(display)`         | Sets display mode (Flex, Grid, Block, None).   |
-| `setPositionType(position)`   | Sets positioning (Relative, Absolute).         |
-| `setFlexDirection(direction)` | Sets flex direction (Row, Column, etc.).       |
-| `setFlexWrap(wrap)`           | Sets flex wrap behavior.                       |
-| `setAlignItems(align)`        | Sets cross-axis alignment for children.        |
-| `setAlignSelf(align)`         | Sets cross-axis alignment for this item.       |
-| `setJustifyContent(justify)`  | Sets main-axis alignment.                      |
-| `setFlexGrow(value)`          | Sets the flex grow factor.                     |
-| `setFlexShrink(value)`        | Sets the flex shrink factor.                   |
-| `setFlexBasis(value)`         | Sets flex basis in pixels.                     |
-| `setFlexBasisPercent(value)`  | Sets flex basis as percentage.                 |
-| `setFlexBasisAuto()`          | Sets flex basis to auto.                       |
-| `setWidth(value)`             | Sets width in pixels.                          |
-| `setWidthPercent(value)`      | Sets width as percentage.                      |
-| `setWidthAuto()`              | Sets width to auto.                            |
-| `setHeight(value)`            | Sets height in pixels.                         |
-| `setHeightPercent(value)`     | Sets height as percentage.                     |
-| `setHeightAuto()`             | Sets height to auto.                           |
-| `setMinWidth(value)`          | Sets minimum width in pixels.                  |
-| `setMinWidthPercent(value)`   | Sets minimum width as percentage.              |
-| `setMinHeight(value)`         | Sets minimum height in pixels.                 |
-| `setMinHeightPercent(value)`  | Sets minimum height as percentage.             |
-| `setMargin(edge, value)`      | Sets margin for specified edge(s).             |
-| `setMarginAuto(edge)`         | Sets margin to auto for specified edge(s).     |
-| `setPadding(edge, value)`     | Sets padding for specified edge(s).            |
-| `setBorder(edge, value)`      | Sets border for specified edge(s).             |
-| `setGap(gutter, value)`       | Sets gap between children.                     |
-| `setMeasureFunc(fn)`          | Sets a custom measure function for leaf nodes. |
+| Method            | Signature                  | Description                 |
+| :---------------- | :------------------------- | :-------------------------- |
+| `parent`          | `(child) → number \| null` | Returns parent node ID      |
+| `children`        | `(parent) → number[]`      | Returns array of child IDs  |
+| `childCount`      | `(parent) → number`        | Returns number of children  |
+| `getChildAtIndex` | `(parent, index) → number` | Returns child at index      |
+| `totalNodeCount`  | `() → number`              | Returns total nodes in tree |
 
-#### Tree Methods
+#### Dirty Tracking
 
-| Method                      | Description                               |
-| :-------------------------- | :---------------------------------------- |
-| `addChild(child)`           | Appends a child node.                     |
-| `insertChild(child, index)` | Inserts a child at the specified index.   |
-| `removeChild(child)`        | Removes a child node.                     |
-| `setChildren(childIds)`     | Replaces all children with the given IDs. |
+| Method      | Signature          | Description                    |
+| :---------- | :----------------- | :----------------------------- |
+| `markDirty` | `(node) → void`    | Marks node for re-layout       |
+| `dirty`     | `(node) → boolean` | Checks if node needs re-layout |
 
-#### Layout Methods
+#### Layout Computation
 
-| Method                          | Description                           |
-| :------------------------------ | :------------------------------------ |
-| `computeLayout(availableSpace)` | Computes layout for this subtree.     |
-| `getLayout()`                   | Returns the computed layout.          |
-| `markDirty()`                   | Marks this node as needing re-layout. |
+| Method                     | Signature                                  | Description                           |
+| :------------------------- | :----------------------------------------- | :------------------------------------ |
+| `computeLayout`            | `(node, availableSpace) → void`            | Computes layout for subtree           |
+| `computeLayoutWithMeasure` | `(node, availableSpace, measureFn) → void` | Computes with custom measure function |
+
+#### Layout Results
+
+| Method            | Signature         | Description                           |
+| :---------------- | :---------------- | :------------------------------------ |
+| `getLayout`       | `(node) → Layout` | Returns computed layout (rounded)     |
+| `unroundedLayout` | `(node) → Layout` | Returns layout with fractional values |
+
+#### Node Context
+
+| Method           | Signature                | Description             |
+| :--------------- | :----------------------- | :---------------------- |
+| `setNodeContext` | `(node, context) → void` | Attaches data to node   |
+| `getNodeContext` | `(node) → any`           | Retrieves attached data |
+
+#### Debug
+
+| Method            | Description                      |
+| :---------------- | :------------------------------- |
+| `printTree(node)` | Prints tree structure to console |
+
+---
+
+### Style Class
+
+Configuration object for CSS layout properties.
+
+```typescript
+const style = new Style();
+```
+
+#### Layout Mode
+
+| Property   | Type       | Description                               |
+| :--------- | :--------- | :---------------------------------------- |
+| `display`  | `Display`  | Layout algorithm: Block, Flex, Grid, None |
+| `position` | `Position` | Positioning: Relative, Absolute           |
+
+#### Flexbox Properties
+
+| Property         | Type            | Description                                       |
+| :--------------- | :-------------- | :------------------------------------------------ |
+| `flex_direction` | `FlexDirection` | Main axis: Row, Column, RowReverse, ColumnReverse |
+| `flex_wrap`      | `FlexWrap`      | Wrap behavior: NoWrap, Wrap, WrapReverse          |
+| `flex_grow`      | `number`        | Grow factor (default: 0)                          |
+| `flex_shrink`    | `number`        | Shrink factor (default: 1)                        |
+| `flex_basis`     | `Dimension`     | Initial size before grow/shrink                   |
+
+#### Alignment
+
+| Property          | Type              | Description                        |
+| :---------------- | :---------------- | :--------------------------------- |
+| `align_items`     | `AlignItems?`     | Cross-axis alignment for children  |
+| `align_self`      | `AlignSelf?`      | Cross-axis alignment for this item |
+| `align_content`   | `AlignContent?`   | Multi-line cross-axis alignment    |
+| `justify_content` | `JustifyContent?` | Main-axis alignment                |
+
+#### Sizing
+
+| Property       | Type                | Description              |
+| :------------- | :------------------ | :----------------------- |
+| `size`         | `{ width, height }` | Element dimensions       |
+| `min_size`     | `{ width, height }` | Minimum size constraints |
+| `max_size`     | `{ width, height }` | Maximum size constraints |
+| `aspect_ratio` | `number?`           | Width-to-height ratio    |
+
+#### Spacing
+
+| Property  | Type                           | Description                           |
+| :-------- | :----------------------------- | :------------------------------------ |
+| `margin`  | `{ left, right, top, bottom }` | Outer spacing (supports Auto)         |
+| `padding` | `{ left, right, top, bottom }` | Inner spacing                         |
+| `border`  | `{ left, right, top, bottom }` | Border width                          |
+| `gap`     | `{ width, height }`            | Gap between children (column/row gap) |
+| `inset`   | `{ left, right, top, bottom }` | Absolute positioning offsets          |
+
+#### Overflow
+
+| Property   | Type       | Description                |
+| :--------- | :--------- | :------------------------- |
+| `overflow` | `{ x, y }` | Overflow behavior per axis |
+
+---
 
 ### Type Definitions
 
-#### `Style`
+#### Dimension (JsDimension)
 
-A comprehensive object mirroring CSS properties:
+Values for size properties:
 
 ```typescript
-interface Style {
-  // Display & Position
-  display?: Display; // Flex, Grid, Block, None
-  position?: Position; // Relative, Absolute
+// Fixed pixel value
+{
+  Length: 100;
+}
 
-  // Dimensions
-  width?: Dimension;
-  height?: Dimension;
-  min_width?: Dimension;
-  min_height?: Dimension;
-  max_width?: Dimension;
-  max_height?: Dimension;
+// Percentage of parent
+{
+  Percent: 0.5;
+} // 50%
 
-  // Position offsets (for absolute positioning)
-  left?: Dimension;
-  right?: Dimension;
-  top?: Dimension;
-  bottom?: Dimension;
+// Automatic sizing
+("Auto");
+```
 
-  // Flexbox
-  flex_direction?: FlexDirection;
-  flex_wrap?: FlexWrap;
-  flex_grow?: number;
-  flex_shrink?: number;
-  flex_basis?: Dimension;
-  justify_content?: JustifyContent;
-  align_items?: AlignItems;
-  align_self?: AlignSelf;
-  align_content?: AlignContent;
+#### LengthPercentage (JsLengthPercentage)
 
-  // Spacing
-  margin_left?: Dimension;
-  margin_right?: Dimension;
-  margin_top?: Dimension;
-  margin_bottom?: Dimension;
-  padding_left?: Dimension;
-  padding_right?: Dimension;
-  padding_top?: Dimension;
-  padding_bottom?: Dimension;
-  row_gap?: Dimension;
-  column_gap?: Dimension;
+For properties that don't support Auto (padding, border):
 
-  // Grid
-  grid_template_rows?: TrackDefinition[];
-  grid_template_columns?: TrackDefinition[];
-  grid_auto_rows?: TrackDefinition[];
-  grid_auto_columns?: TrackDefinition[];
-  grid_auto_flow?: GridAutoFlow;
-  grid_row?: Line;
-  grid_column?: Line;
+```typescript
+{
+  Length: 10;
+}
+{
+  Percent: 0.1;
 }
 ```
 
-#### `Dimension`
+#### LengthPercentageAuto (JsLengthPercentageAuto)
+
+For properties that support Auto (margin, inset):
 
 ```typescript
-interface Dimension {
-  value: number;
-  unit: "Pixels" | "Percent" | "Auto";
+{
+  Length: 10;
+}
+{
+  Percent: 0.1;
+}
+("Auto");
+```
+
+#### AvailableSpace (JsAvailableSize)
+
+Constraints for layout computation:
+
+```typescript
+{
+  width: { Definite: 800 },   // Fixed width
+  height: { Definite: 600 }   // Fixed height
+}
+
+{
+  width: "MaxContent",        // Intrinsic max width
+  height: "MinContent"        // Intrinsic min height
 }
 ```
 
-#### `AvailableSpace`
+#### Layout Result
 
-Used when triggering layout computation:
+Returned by `getLayout()`:
 
 ```typescript
-interface AvailableSpace {
-  width?: number; // undefined = unlimited/content-based
-  height?: number; // undefined = unlimited/content-based
+{
+  order: number,
+  size: { width: number, height: number },
+  location: { x: number, y: number },
+  padding: { left, right, top, bottom },
+  border: { left, right, top, bottom },
+  scrollbar_size: { width, height },
+  content_size: { width, height }
 }
 ```
 
-#### `Layout`
-
-The computed layout result:
-
-```typescript
-interface Layout {
-  x: number; // X position relative to parent
-  y: number; // Y position relative to parent
-  width: number; // Computed width
-  height: number; // Computed height
-}
-```
+---
 
 ### Enums
 
 #### Display
 
-- `Display.None` - Hidden, takes no space
-- `Display.Flex` - Flexbox container
-- `Display.Grid` - Grid container
-- `Display.Block` - Block layout
+```typescript
+Display.Block; // Block layout (default)
+Display.Flex; // Flexbox container
+Display.Grid; // CSS Grid container
+Display.None; // Hidden, takes no space
+```
 
 #### Position
 
-- `Position.Static` - Normal flow (treated as Relative)
-- `Position.Relative` - Normal flow
-- `Position.Absolute` - Removed from flow, positioned relative to containing block
+```typescript
+Position.Relative; // Normal document flow (default)
+Position.Absolute; // Removed from flow, positioned via inset
+```
 
 #### FlexDirection
 
-- `FlexDirection.Row` - Horizontal, left to right
-- `FlexDirection.Column` - Vertical, top to bottom
-- `FlexDirection.RowReverse` - Horizontal, right to left
-- `FlexDirection.ColumnReverse` - Vertical, bottom to top
+```typescript
+FlexDirection.Row; // Horizontal, left to right
+FlexDirection.Column; // Vertical, top to bottom
+FlexDirection.RowReverse; // Horizontal, right to left
+FlexDirection.ColumnReverse; // Vertical, bottom to top
+```
 
-#### JustifyContent
+#### FlexWrap
 
-- `JustifyContent.Start`, `FlexStart`
-- `JustifyContent.End`, `FlexEnd`
-- `JustifyContent.Center`
-- `JustifyContent.SpaceBetween`
-- `JustifyContent.SpaceAround`
-- `JustifyContent.SpaceEvenly`
+```typescript
+FlexWrap.NoWrap; // Single line (default)
+FlexWrap.Wrap; // Wrap to multiple lines
+FlexWrap.WrapReverse; // Wrap in reverse order
+```
 
 #### AlignItems / AlignSelf
 
-- `Start`, `End`, `FlexStart`, `FlexEnd`
-- `Center`, `Baseline`, `Stretch`
-- `AlignSelf.Auto` (inherit from parent)
+```typescript
+AlignItems.Start; // Align to start
+AlignItems.End; // Align to end
+AlignItems.FlexStart; // Align to flex start
+AlignItems.FlexEnd; // Align to flex end
+AlignItems.Center; // Center alignment
+AlignItems.Baseline; // Baseline alignment
+AlignItems.Stretch; // Stretch to fill
 
-#### Edge
-
-- `Edge.Left`, `Edge.Right`, `Edge.Top`, `Edge.Bottom`
-- `Edge.Start`, `Edge.End` (logical)
-- `Edge.Horizontal`, `Edge.Vertical`
-- `Edge.All`
-
-#### Gutter
-
-- `Gutter.Column` - Gap between columns
-- `Gutter.Row` - Gap between rows
-- `Gutter.All` - Both directions
-
-## 🐛 Debug Logging
-
-For development, you can enable verbose console logging by building with the `debug` feature:
-
-```bash
-# When building from source
-wasm-pack build --features debug
+AlignSelf.Auto; // Inherit from parent (AlignSelf only)
 ```
 
-When enabled, the library outputs detailed logs to the browser console including:
+#### AlignContent
 
-- Node creation and removal
-- Style updates
-- Layout computation details
-- Error diagnostics
+```typescript
+AlignContent.Start;
+AlignContent.End;
+AlignContent.FlexStart;
+AlignContent.FlexEnd;
+AlignContent.Center;
+AlignContent.Stretch;
+AlignContent.SpaceBetween;
+AlignContent.SpaceAround;
+AlignContent.SpaceEvenly;
+```
 
-**Note**: Debug logging is disabled by default for optimal performance in production.
+#### JustifyContent
+
+```typescript
+JustifyContent.Start;
+JustifyContent.End;
+JustifyContent.FlexStart;
+JustifyContent.FlexEnd;
+JustifyContent.Center;
+JustifyContent.Stretch;
+JustifyContent.SpaceBetween;
+JustifyContent.SpaceAround;
+JustifyContent.SpaceEvenly;
+```
+
+#### Overflow
+
+```typescript
+Overflow.Visible; // Content not clipped
+Overflow.Hidden; // Content clipped
+Overflow.Scroll; // Always show scrollbars
+Overflow.Auto; // Show scrollbars when needed
+```
+
+---
+
+## 📏 Custom Measurement
+
+For nodes with intrinsic sizes (like text), use `computeLayoutWithMeasure`:
+
+```typescript
+tree.computeLayoutWithMeasure(
+  root,
+  { width: { Definite: 800 }, height: { Definite: 600 } },
+  (knownDimensions, availableSpace, context) => {
+    // knownDimensions: { width: number | null, height: number | null }
+    // availableSpace: { width: AvailableSpace, height: AvailableSpace }
+    // context: The value attached via setNodeContext/newLeafWithContext
+
+    // Return the measured size
+    return { width: 100, height: 20 };
+  },
+);
+```
+
+**Example with text measurement:**
+
+```typescript
+// Create a text node with context
+const textNode = tree.newLeafWithContext(style, { text: "Hello World" });
+
+// Measure function
+tree.computeLayoutWithMeasure(root, availableSpace, (known, available, ctx) => {
+  if (ctx?.text) {
+    // Use your text measurement library here
+    const measured = measureText(ctx.text, available.width);
+    return { width: measured.width, height: measured.height };
+  }
+  return { width: 0, height: 0 };
+});
+```
+
+---
 
 ## 🛠 Building from Source
 
-If you want to contribute or build the WASM binary yourself:
+1. **Prerequisites**: Install Rust and `wasm-pack`
 
-1.  **Prerequisites**: Install Rust and `wasm-pack`.
+   ```bash
+   curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+   ```
 
-    ```bash
-    curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-    ```
+2. **Build**
 
-2.  **Build** (production):
+   ```bash
+   npm install
+   npm run build
+   ```
 
-    ```bash
-    npm install
-    npm run build
-    ```
+3. **Build with debug features**
 
-3.  **Build** (with debug logging):
-    ```bash
-    wasm-pack build --features debug
-    ```
+   ```bash
+   wasm-pack build --features console_error_panic_hook
+   ```
 
-The artifacts will be generated in the `pkg/` directory.
+---
 
 ## 📄 License
 
