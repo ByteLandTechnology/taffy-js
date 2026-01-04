@@ -255,6 +255,135 @@ impl From<taffy::style::BoxSizing> for BoxSizing {
 }
 
 // =============================================================================
+// Layout Output Type
+// =============================================================================
+//
+// Layout represents the computed layout result for a node after running the
+// layout algorithm. It wraps the native taffy::Layout struct.
+// =============================================================================
+
+/// Layout result struct
+///
+/// A wrapper around `taffy::Layout` that provides WASM bindings.
+/// Contains the computed layout values for a node after calling `computeLayout()`.
+/// All values are in pixels.
+///
+/// # Properties
+/// - `order`: Rendering order (higher = on top)
+/// - `x`, `y`: Position of top-left corner relative to parent
+/// - `width`, `height`: Computed dimensions
+/// - `contentWidth`, `contentHeight`: Size of scrollable content
+/// - `scrollbarWidth`, `scrollbarHeight`: Size allocated for scrollbars
+/// - `borderLeft`, `borderRight`, `borderTop`, `borderBottom`: Border widths
+/// - `paddingLeft`, `paddingRight`, `paddingTop`, `paddingBottom`: Padding sizes
+/// - `marginLeft`, `marginRight`, `marginTop`, `marginBottom`: Margin sizes
+#[wasm_bindgen]
+#[derive(Clone, Debug)]
+pub struct Layout {
+    /// The inner taffy::Layout object
+    inner: taffy::Layout,
+}
+
+#[wasm_bindgen]
+impl Layout {
+    /// Gets the rendering order of the node.
+    #[wasm_bindgen(getter)]
+    pub fn order(&self) -> u32 { self.inner.order }
+    
+    /// Gets the x coordinate of the node's top-left corner.
+    #[wasm_bindgen(getter)]
+    pub fn x(&self) -> f32 { self.inner.location.x }
+    
+    /// Gets the y coordinate of the node's top-left corner.
+    #[wasm_bindgen(getter)]
+    pub fn y(&self) -> f32 { self.inner.location.y }
+    
+    /// Gets the computed width of the node.
+    #[wasm_bindgen(getter)]
+    pub fn width(&self) -> f32 { self.inner.size.width }
+    
+    /// Gets the computed height of the node.
+    #[wasm_bindgen(getter)]
+    pub fn height(&self) -> f32 { self.inner.size.height }
+    
+    /// Gets the width of the scrollable content.
+    #[wasm_bindgen(getter, js_name = contentWidth)]
+    pub fn content_width(&self) -> f32 { self.inner.content_size.width }
+    
+    /// Gets the height of the scrollable content.
+    #[wasm_bindgen(getter, js_name = contentHeight)]
+    pub fn content_height(&self) -> f32 { self.inner.content_size.height }
+    
+    /// Gets the width of the vertical scrollbar.
+    #[wasm_bindgen(getter, js_name = scrollbarWidth)]
+    pub fn scrollbar_width(&self) -> f32 { self.inner.scrollbar_size.width }
+    
+    /// Gets the height of the horizontal scrollbar.
+    #[wasm_bindgen(getter, js_name = scrollbarHeight)]
+    pub fn scrollbar_height(&self) -> f32 { self.inner.scrollbar_size.height }
+    
+    /// Gets the left border width.
+    #[wasm_bindgen(getter, js_name = borderLeft)]
+    pub fn border_left(&self) -> f32 { self.inner.border.left }
+    
+    /// Gets the right border width.
+    #[wasm_bindgen(getter, js_name = borderRight)]
+    pub fn border_right(&self) -> f32 { self.inner.border.right }
+    
+    /// Gets the top border width.
+    #[wasm_bindgen(getter, js_name = borderTop)]
+    pub fn border_top(&self) -> f32 { self.inner.border.top }
+    
+    /// Gets the bottom border width.
+    #[wasm_bindgen(getter, js_name = borderBottom)]
+    pub fn border_bottom(&self) -> f32 { self.inner.border.bottom }
+    
+    /// Gets the left padding.
+    #[wasm_bindgen(getter, js_name = paddingLeft)]
+    pub fn padding_left(&self) -> f32 { self.inner.padding.left }
+    
+    /// Gets the right padding.
+    #[wasm_bindgen(getter, js_name = paddingRight)]
+    pub fn padding_right(&self) -> f32 { self.inner.padding.right }
+    
+    /// Gets the top padding.
+    #[wasm_bindgen(getter, js_name = paddingTop)]
+    pub fn padding_top(&self) -> f32 { self.inner.padding.top }
+    
+    /// Gets the bottom padding.
+    #[wasm_bindgen(getter, js_name = paddingBottom)]
+    pub fn padding_bottom(&self) -> f32 { self.inner.padding.bottom }
+    
+    /// Gets the left margin.
+    #[wasm_bindgen(getter, js_name = marginLeft)]
+    pub fn margin_left(&self) -> f32 { self.inner.margin.left }
+    
+    /// Gets the right margin.
+    #[wasm_bindgen(getter, js_name = marginRight)]
+    pub fn margin_right(&self) -> f32 { self.inner.margin.right }
+    
+    /// Gets the top margin.
+    #[wasm_bindgen(getter, js_name = marginTop)]
+    pub fn margin_top(&self) -> f32 { self.inner.margin.top }
+    
+    /// Gets the bottom margin.
+    #[wasm_bindgen(getter, js_name = marginBottom)]
+    pub fn margin_bottom(&self) -> f32 { self.inner.margin.bottom }
+}
+
+impl From<&taffy::Layout> for Layout {
+    fn from(layout: &taffy::Layout) -> Self {
+        Layout { inner: layout.clone() }
+    }
+}
+
+impl From<taffy::Layout> for Layout {
+    fn from(layout: taffy::Layout) -> Self {
+        Layout { inner: layout }
+    }
+}
+
+// =============================================================================
 // Data Transfer Objects (DTOs)
 // =============================================================================
 //
@@ -1303,12 +1432,11 @@ impl TaffyTree {
     /// * `node` - The node ID to query.
     /// 
     /// # Returns
-    /// A layout object: `{ order, size: {width, height}, location: {x, y}, ... }`
+    /// A `Layout` object with computed position, size, and spacing values.
     #[wasm_bindgen(js_name = getLayout)] 
-    pub fn layout(&self, node: u64) -> Result<JsValue, JsValue> { 
+    pub fn layout(&self, node: u64) -> Result<Layout, JsValue> { 
         let layout = self.tree.layout(NodeId::from(node)).map_err(|e| e.to_string())?; 
-        let val = serde_wasm_bindgen::to_value(layout)?; 
-        Ok(val) 
+        Ok(Layout::from(layout)) 
     }
     
     /// Gets the unrounded (fractional) layout for a node.
@@ -1319,12 +1447,11 @@ impl TaffyTree {
     /// * `node` - The node ID to query.
     /// 
     /// # Returns
-    /// A layout object with potentially fractional values.
+    /// A `Layout` object with potentially fractional pixel values.
     #[wasm_bindgen(js_name = unroundedLayout)] 
-    pub fn unrounded_layout(&self, node: u64) -> Result<JsValue, JsValue> { 
+    pub fn unrounded_layout(&self, node: u64) -> Result<Layout, JsValue> { 
         let layout = self.tree.unrounded_layout(NodeId::from(node)); 
-        let val = serde_wasm_bindgen::to_value(layout)?; 
-        Ok(val) 
+        Ok(Layout::from(layout)) 
     }
     
     /// Gets detailed layout information (debug feature).
