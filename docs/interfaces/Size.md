@@ -26,7 +26,7 @@ const dimensionSize: Size<Dimension> = {
 
 const availableSize: Size<AvailableSpace> = {
   width: 800,
-  height: "MaxContent",
+  height: "maxContent",
 };
 ```
 

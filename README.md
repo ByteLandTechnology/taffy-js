@@ -325,7 +325,7 @@ interface Point<T> {
 }
 
 // Available space for layout computation
-type AvailableSpace = number | "MinContent" | "MaxContent";
+type AvailableSpace = number | "minContent" | "maxContent";
 
 // Measure function for custom content measurement
 type MeasureFunction = (
@@ -346,7 +346,7 @@ const textNode = tree.newLeafWithContext(textStyle, { text: "Hello, World!" });
 
 tree.computeLayoutWithMeasure(
   rootNode,
-  { width: 800, height: "MaxContent" },
+  { width: 800, height: "maxContent" },
   (known, available, node, context, style) => {
     if (context?.text) {
       // Your text measurement logic here

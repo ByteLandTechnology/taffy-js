@@ -887,7 +887,7 @@ impl JsTaffyTree {
     /// ```typescript
     /// tree.computeLayoutWithMeasure(
     ///   rootId,
-    ///   { width: 800, height: "MaxContent" },
+    ///   { width: 800, height: "maxContent" },
     ///   (known, available, node, context, style) => {
     ///     if (context?.text) {
     ///       const measured = measureText(context.text, available.width);
@@ -925,8 +925,12 @@ impl JsTaffyTree {
             let this = JsValue::NULL;
             let known_val =
                 serde_wasm_bindgen::to_value(&known_dimensions).unwrap_or(JsValue::NULL);
+            let available_dto = AvailableSizeDto {
+                width: available_space.width.into(),
+                height: available_space.height.into(),
+            };
             let available_val =
-                serde_wasm_bindgen::to_value(&available_space).unwrap_or(JsValue::NULL);
+                serde_wasm_bindgen::to_value(&available_dto).unwrap_or(JsValue::NULL);
             let ctx = context.cloned().unwrap_or(JsValue::UNDEFINED);
             let style = JsStyle {
                 inner: _style.clone(),
@@ -963,10 +967,10 @@ impl JsTaffyTree {
     /// { width: 800, height: 600 }
     ///
     /// // Flexible width, fixed height
-    /// { width: "MaxContent", height: 600 }
+    /// { width: "maxContent", height: 600 }
     ///
     /// // Minimum content size
-    /// { width: "MinContent", height: "MinContent" }
+    /// { width: "minContent", height: "minContent" }
     /// ```
     ///
     /// @throws `TaffyError` if the node does not exist or available space is invalid

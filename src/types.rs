@@ -185,7 +185,7 @@ export type AvailableSpace = number | "minContent" | "maxContent";
  *
  * const availableSize: Size<AvailableSpace> = {
  *   width: 800,
- *   height: "MaxContent"
+ *   height: "maxContent"
  * };
  * ```
  */
@@ -961,7 +961,7 @@ where
 /// { "width": 800, "height": 600 }
 /// { "width": "maxContent", "height": 400 }
 /// ```
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AvailableSizeDto {
     /// Horizontal space constraint
     pub width: AvailableSpaceDto,
@@ -984,6 +984,19 @@ pub enum AvailableSpaceDto {
     MinContent,
     /// Maximize to fit content without wrapping
     MaxContent,
+}
+
+impl Serialize for AvailableSpaceDto {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            AvailableSpaceDto::Definite(val) => serializer.serialize_f32(*val),
+            AvailableSpaceDto::MinContent => serializer.serialize_str("minContent"),
+            AvailableSpaceDto::MaxContent => serializer.serialize_str("maxContent"),
+        }
+    }
 }
 
 impl<'de> Deserialize<'de> for AvailableSpaceDto {
@@ -1043,6 +1056,16 @@ impl From<AvailableSpaceDto> for AvailableSpace {
             AvailableSpaceDto::Definite(v) => AvailableSpace::Definite(v),
             AvailableSpaceDto::MinContent => AvailableSpace::MinContent,
             AvailableSpaceDto::MaxContent => AvailableSpace::MaxContent,
+        }
+    }
+}
+
+impl From<AvailableSpace> for AvailableSpaceDto {
+    fn from(s: AvailableSpace) -> Self {
+        match s {
+            AvailableSpace::Definite(v) => AvailableSpaceDto::Definite(v),
+            AvailableSpace::MinContent => AvailableSpaceDto::MinContent,
+            AvailableSpace::MaxContent => AvailableSpaceDto::MaxContent,
         }
     }
 }

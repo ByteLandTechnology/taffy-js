@@ -198,10 +198,10 @@ to compute layouts for all nodes in the tree.
 { width: 800, height: 600 }
 
 // Flexible width, fixed height
-{ width: "MaxContent", height: 600 }
+{ width: "maxContent", height: 600 }
 
 // Minimum content size
-{ width: "MinContent", height: "MinContent" }
+{ width: "minContent", height: "minContent" }
 ```
 
 ```typescript
@@ -250,7 +250,7 @@ called for each leaf node that needs measurement.
 ```typescript
 tree.computeLayoutWithMeasure(
   rootId,
-  { width: 800, height: "MaxContent" },
+  { width: 800, height: "maxContent" },
   (known, available, node, context, style) => {
     if (context?.text) {
       const measured = measureText(context.text, available.width);
