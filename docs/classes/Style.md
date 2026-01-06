@@ -22,8 +22,8 @@ When created, all properties are set to their CSS default values:
 - `flexGrow`: `0`
 - `flexShrink`: `1`
 - All alignment properties: `undefined` (use default behavior)
-- All dimensions: `"Auto"`
-- All spacing: `{ Length: 0 }`
+- All dimensions: `"auto"`
+- All spacing: `0`
 
 ## Constructors
 

@@ -20,8 +20,8 @@ import type { Size, Dimension, AvailableSpace } from "taffy-js";
 const pixelSize: Size<number> = { width: 200, height: 100 };
 
 const dimensionSize: Size<Dimension> = {
-  width: { Length: 200 },
-  height: { Percent: 50 },
+  width: 200,
+  height: "50%",
 };
 
 const availableSize: Size<AvailableSpace> = {

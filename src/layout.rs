@@ -13,7 +13,7 @@
 //!
 //! ```typescript
 //! // Compute layout first
-//! tree.computeLayout(rootNode, { width: { Definite: 800 }, height: { Definite: 600 } });
+//! tree.computeLayout(rootNode, { width: 800, height: 600 });
 //!
 //! // Get layout for a specific node
 //! const layout = tree.getLayout(nodeId);

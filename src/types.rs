@@ -179,8 +179,8 @@ export type AvailableSpace = number | "minContent" | "maxContent";
  * const pixelSize: Size<number> = { width: 200, height: 100 };
  *
  * const dimensionSize: Size<Dimension> = {
- *   width: { Length: 200 },
- *   height: { Percent: 50 }
+ *   width: 200,
+ *   height: "50%"
  * };
  *
  * const availableSize: Size<AvailableSpace> = {
@@ -628,7 +628,7 @@ impl From<DimensionDto> for Dimension {
     fn from(v: DimensionDto) -> Self {
         match v {
             DimensionDto::Length(f) => Dimension::length(f),
-            DimensionDto::Percent(f) => Dimension::percent(f),
+            DimensionDto::Percent(f) => Dimension::percent(f / 100.0),
             DimensionDto::Auto => Dimension::auto(),
         }
     }
@@ -641,7 +641,7 @@ impl From<Dimension> for DimensionDto {
         } else {
             match d.into_raw().tag() {
                 CompactLength::LENGTH_TAG => DimensionDto::Length(d.value()),
-                CompactLength::PERCENT_TAG => DimensionDto::Percent(d.value()),
+                CompactLength::PERCENT_TAG => DimensionDto::Percent(d.value() * 100.0),
                 _ => DimensionDto::Auto,
             }
         }
@@ -736,7 +736,7 @@ impl From<LengthPercentageDto> for LengthPercentage {
     fn from(v: LengthPercentageDto) -> Self {
         match v {
             LengthPercentageDto::Length(f) => LengthPercentage::length(f),
-            LengthPercentageDto::Percent(f) => LengthPercentage::percent(f),
+            LengthPercentageDto::Percent(f) => LengthPercentage::percent(f / 100.0),
         }
     }
 }
@@ -746,7 +746,7 @@ impl From<LengthPercentage> for LengthPercentageDto {
         let inner = val.into_raw();
         match inner.tag() {
             CompactLength::LENGTH_TAG => LengthPercentageDto::Length(inner.value()),
-            CompactLength::PERCENT_TAG => LengthPercentageDto::Percent(inner.value()),
+            CompactLength::PERCENT_TAG => LengthPercentageDto::Percent(inner.value() * 100.0),
             _ => LengthPercentageDto::Length(0.0),
         }
     }
@@ -845,7 +845,7 @@ impl From<LengthPercentageAutoDto> for LengthPercentageAuto {
     fn from(v: LengthPercentageAutoDto) -> Self {
         match v {
             LengthPercentageAutoDto::Length(f) => LengthPercentageAuto::length(f),
-            LengthPercentageAutoDto::Percent(f) => LengthPercentageAuto::percent(f),
+            LengthPercentageAutoDto::Percent(f) => LengthPercentageAuto::percent(f / 100.0),
             LengthPercentageAutoDto::Auto => LengthPercentageAuto::auto(),
         }
     }
@@ -859,7 +859,9 @@ impl From<LengthPercentageAuto> for LengthPercentageAutoDto {
         } else {
             match inner.tag() {
                 CompactLength::LENGTH_TAG => LengthPercentageAutoDto::Length(inner.value()),
-                CompactLength::PERCENT_TAG => LengthPercentageAutoDto::Percent(inner.value()),
+                CompactLength::PERCENT_TAG => {
+                    LengthPercentageAutoDto::Percent(inner.value() * 100.0)
+                }
                 _ => LengthPercentageAutoDto::Auto,
             }
         }
@@ -878,7 +880,8 @@ impl From<LengthPercentageAuto> for LengthPercentageAutoDto {
 ///
 /// @example
 /// ```json
-/// { "width": { "Length": 100 }, "height": { "Length": 50 } }
+/// { "width": 100, "height": 50 }
+/// { "width": "50%", "height": "auto" }
 /// ```
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct SizeDto<T> {
@@ -914,7 +917,8 @@ where
 ///
 /// @example
 /// ```json
-/// { "left": { "Length": 10 }, "right": { "Length": 10 }, "top": { "Length": 5 }, "bottom": { "Length": 5 } }
+/// { "left": 10, "right": 10, "top": 5, "bottom": 5 }
+/// { "left": "5%", "right": "5%", "top": "auto", "bottom": "auto" }
 /// ```
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct RectDto<T> {

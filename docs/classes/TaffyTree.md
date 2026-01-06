@@ -195,20 +195,17 @@ to compute layouts for all nodes in the tree.
 
 ```typescript
 // Fixed size container
-{ width: { Definite: 800 }, height: { Definite: 600 } }
+{ width: 800, height: 600 }
 
 // Flexible width, fixed height
-{ width: "MaxContent", height: { Definite: 600 } }
+{ width: "MaxContent", height: 600 }
 
 // Minimum content size
 { width: "MinContent", height: "MinContent" }
 ```
 
 ```typescript
-tree.computeLayout(rootId, {
-  width: { Definite: 800 },
-  height: { Definite: 600 },
-});
+tree.computeLayout(rootId, { width: 800, height: 600 });
 ```
 
 #### Throws
@@ -253,7 +250,7 @@ called for each leaf node that needs measurement.
 ```typescript
 tree.computeLayoutWithMeasure(
   rootId,
-  { width: { Definite: 800 }, height: "MaxContent" },
+  { width: 800, height: "MaxContent" },
   (known, available, node, context, style) => {
     if (context?.text) {
       const measured = measureText(context.text, available.width);
@@ -460,10 +457,7 @@ and size for a node.
 #### Example
 
 ```typescript
-tree.computeLayout(rootId, {
-  width: { Definite: 800 },
-  height: { Definite: 600 },
-});
+tree.computeLayout(rootId, { width: 800, height: 600 });
 const layout: Layout = tree.getLayout(nodeId);
 console.log(
   `Position: (${layout.x}, ${layout.y}), Size: ${layout.width}x${layout.height}`,
@@ -666,7 +660,7 @@ content (like text) rather than other elements.
 
 ```typescript
 const style = new Style();
-style.size = { width: { Length: 100 }, height: { Length: 50 } };
+style.size = { width: 100, height: 50 };
 const nodeId: bigint = tree.newLeaf(style);
 ```
 

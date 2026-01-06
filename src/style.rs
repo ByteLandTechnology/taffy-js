@@ -35,16 +35,16 @@
 //!
 //! // Set dimensions with explicit types
 //! const size: Size<Dimension> = {
-//!   width: { Length: 200 },
-//!   height: { Length: 100 }
+//!   width: 200,
+//!   height: 100
 //! };
 //! style.size = size;
 //!
 //! const padding: Rect<LengthPercentage> = {
-//!   left: { Length: 10 },
-//!   right: { Length: 10 },
-//!   top: { Length: 5 },
-//!   bottom: { Length: 5 }
+//!   left: 10,
+//!   right: 10,
+//!   top: 5,
+//!   bottom: 5
 //! };
 //! style.padding = padding;
 //!
@@ -67,9 +67,9 @@
 //!
 //! Several properties use special dimension types:
 //!
-//! - **Dimension**: `{ Length: number }`, `{ Percent: number }`, or `"Auto"`
-//! - **LengthPercentage**: `{ Length: number }` or `{ Percent: number }`
-//! - **LengthPercentageAuto**: Same as Dimension
+//! - **Dimension**: `number`, `"{number}%"`, or `"auto"`
+//! - **LengthPercentage**: `number` or `"{number}%"`
+//! - **LengthPercentageAuto**: `number`, `"{number}%"`, or `"auto"`
 
 use crate::enums::*;
 use crate::types::*;
@@ -96,8 +96,8 @@ use wasm_bindgen::prelude::*;
 /// - `flexGrow`: `0`
 /// - `flexShrink`: `1`
 /// - All alignment properties: `undefined` (use default behavior)
-/// - All dimensions: `"Auto"`
-/// - All spacing: `{ Length: 0 }`
+/// - All dimensions: `"auto"`
+/// - All spacing: `0`
 ///
 #[wasm_bindgen(js_name = Style)]
 pub struct JsStyle {
@@ -179,7 +179,7 @@ impl JsStyle {
     ///
     /// ```typescript
     /// style.position = Position.Absolute;
-    /// style.inset = { left: { Length: 10 }, top: { Length: 10 }, right: "Auto", bottom: "Auto" };
+    /// style.inset = { left: 10, top: 10, right: "auto", bottom: "auto" };
     /// ```
     #[wasm_bindgen(setter)]
     pub fn set_position(&mut self, val: JsPosition) {
@@ -507,7 +507,7 @@ impl JsStyle {
     ///
     /// The initial size of a flex item before growing/shrinking.
     ///
-    /// @returns - A `Dimension` value (`{ Length: n }`, `{ Percent: n }`, or `"Auto"`)
+    /// @returns - A `Dimension` value (`number`, `\"{number}%\"`, or `\"auto\"`)
     #[wasm_bindgen(getter, js_name = flexBasis)]
     pub fn flex_basis(&self) -> JsDimension {
         let d: DimensionDto = self.inner.flex_basis.into();
@@ -520,7 +520,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
-    /// style.flexBasis = { Length: 100 };
+    /// style.flexBasis = 100;
     /// ```
     #[wasm_bindgen(setter, js_name = flexBasis)]
     pub fn set_flex_basis(&mut self, val: JsDimension) {
@@ -552,7 +552,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
-    /// style.size = { width: { Length: 200 }, height: { Percent: 100 } };
+    /// style.size = { width: 200, height: "100%" };
     /// ```
     #[wasm_bindgen(setter)]
     pub fn set_size(&mut self, val: JsSizeDimension) {
@@ -589,7 +589,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
-    /// style.minSize = { width: { Length: 100 }, height: "Auto" };
+    /// style.minSize = { width: 100, height: "auto" };
     /// ```
     #[wasm_bindgen(setter, js_name = minSize)]
     pub fn set_min_size(&mut self, val: JsSizeDimension) {
@@ -617,7 +617,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
-    /// style.maxSize = { width: "MaxContent", height: { Length: 500 } };
+    /// style.maxSize = { width: "auto", height: 500 };
     /// ```
     #[wasm_bindgen(setter, js_name = maxSize)]
     pub fn set_max_size(&mut self, val: JsSizeDimension) {
@@ -653,7 +653,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
-    /// style.margin = { left: { Length: 10 }, right: { Length: 10 }, top: { Length: 5 }, bottom: { Length: 5 } };
+    /// style.margin = { left: 10, right: 10, top: 5, bottom: 5 };
     /// ```
     #[wasm_bindgen(setter)]
     pub fn set_margin(&mut self, val: JsRectLengthPercentageAuto) {
@@ -685,7 +685,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
-    /// style.padding = { left: { Length: 20 }, right: { Length: 20 }, top: { Length: 10 }, bottom: { Length: 10 } };
+    /// style.padding = { left: 20, right: 20, top: 10, bottom: 10 };
     /// ```
     #[wasm_bindgen(setter)]
     pub fn set_padding(&mut self, val: JsRectLengthPercentage) {
@@ -717,7 +717,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
-    /// style.border = { left: { Length: 1 }, right: { Length: 1 }, top: { Length: 1 }, bottom: { Length: 1 } };
+    /// style.border = { left: 1, right: 1, top: 1, bottom: 1 };
     /// ```
     #[wasm_bindgen(setter)]
     pub fn set_border(&mut self, val: JsRectLengthPercentage) {
@@ -747,7 +747,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
-    /// style.gap = { width: { Length: 10 }, height: { Length: 10 } };
+    /// style.gap = { width: 10, height: 10 };
     /// ```
     #[wasm_bindgen(setter)]
     pub fn set_gap(&mut self, val: JsSizeLengthPercentage) {
@@ -780,7 +780,7 @@ impl JsStyle {
     /// @example
     /// ```typescript
     /// style.position = Position.Absolute;
-    /// style.inset = { left: { Length: 0 }, top: { Length: 0 }, right: "Auto", bottom: "Auto" };
+    /// style.inset = { left: 0, top: 0, right: "auto", bottom: "auto" };
     /// ```
     #[wasm_bindgen(setter)]
     pub fn set_inset(&mut self, val: JsRectLengthPercentageAuto) {

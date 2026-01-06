@@ -44,8 +44,8 @@
 //! containerStyle.flexDirection = FlexDirection.Column;
 //!
 //! const containerSize: Size<Dimension> = {
-//!   width: { Length: 300 },
-//!   height: { Length: 200 }
+//!   width: 300,
+//!   height: 200
 //! };
 //! containerStyle.size = containerSize;
 //!
@@ -63,8 +63,8 @@
 //!
 //! // Compute layout with typed available space
 //! const availableSpace: Size<AvailableSpace> = {
-//!   width: { Definite: 300 },
-//!   height: { Definite: 200 }
+//!   width: 300,
+//!   height: 200
 //! };
 //! tree.computeLayout(container, availableSpace);
 //!
@@ -216,7 +216,7 @@ impl JsTaffyTree {
     /// @example
     /// ```typescript
     /// const style = new Style();
-    /// style.size = { width: { Length: 100 }, height: { Length: 50 } };
+    /// style.size = { width: 100, height: 50 };
     /// const nodeId: bigint = tree.newLeaf(style);
     /// ```
     #[wasm_bindgen(js_name = newLeaf)]
@@ -741,7 +741,7 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
-    /// tree.computeLayout(rootId, { width: { Definite: 800 }, height: { Definite: 600 } });
+    /// tree.computeLayout(rootId, { width: 800, height: 600 });
     /// const layout: Layout = tree.getLayout(nodeId);
     /// console.log(`Position: (${layout.x}, ${layout.y}), Size: ${layout.width}x${layout.height}`);
     /// ```
@@ -887,7 +887,7 @@ impl JsTaffyTree {
     /// ```typescript
     /// tree.computeLayoutWithMeasure(
     ///   rootId,
-    ///   { width: { Definite: 800 }, height: "MaxContent" },
+    ///   { width: 800, height: "MaxContent" },
     ///   (known, available, node, context, style) => {
     ///     if (context?.text) {
     ///       const measured = measureText(context.text, available.width);
@@ -960,10 +960,10 @@ impl JsTaffyTree {
     /// @example
     /// ```typescript
     /// // Fixed size container
-    /// { width: { Definite: 800 }, height: { Definite: 600 } }
+    /// { width: 800, height: 600 }
     ///
     /// // Flexible width, fixed height
-    /// { width: "MaxContent", height: { Definite: 600 } }
+    /// { width: "MaxContent", height: 600 }
     ///
     /// // Minimum content size
     /// { width: "MinContent", height: "MinContent" }
@@ -973,7 +973,7 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
-    /// tree.computeLayout(rootId, { width: { Definite: 800 }, height: { Definite: 600 } });
+    /// tree.computeLayout(rootId, { width: 800, height: 600 });
     /// ```
     #[wasm_bindgen(js_name = computeLayout)]
     pub fn compute_layout(

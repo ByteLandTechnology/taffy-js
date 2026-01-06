@@ -44,18 +44,13 @@ async function main() {
   containerStyle.display = Display.Flex;
   containerStyle.flexDirection = FlexDirection.Column;
   containerStyle.alignItems = AlignItems.Center;
-  containerStyle.size = { width: { Length: 300 }, height: { Length: 200 } };
-  containerStyle.padding = {
-    left: { Length: 10 },
-    right: { Length: 10 },
-    top: { Length: 10 },
-    bottom: { Length: 10 },
-  };
+  containerStyle.size = { width: 300, height: 200 };
+  containerStyle.padding = { left: 10, right: 10, top: 10, bottom: 10 };
 
   // Create child styles
   const childStyle = new Style();
   childStyle.flexGrow = 1;
-  childStyle.size = { width: { Percent: 100 }, height: "Auto" };
+  childStyle.size = { width: "100%", height: "auto" };
 
   // Create nodes
   const child1 = tree.newLeaf(childStyle);
@@ -66,10 +61,7 @@ async function main() {
   );
 
   // Compute layout
-  tree.computeLayout(container, {
-    width: { Definite: 300 },
-    height: { Definite: 200 },
-  });
+  tree.computeLayout(container, { width: 300, height: 200 });
 
   // Read computed layouts
   const containerLayout = tree.getLayout(container);
@@ -311,10 +303,10 @@ enum BoxSizing {
 ### Types
 
 ```typescript
-// Dimension values
-type Dimension = { Length: number } | { Percent: number } | "Auto";
-type LengthPercentage = { Length: number } | { Percent: number };
-type LengthPercentageAuto = { Length: number } | { Percent: number } | "Auto";
+// Dimension values (CSS-like syntax)
+type Dimension = number | `${number}%` | "auto"; // e.g., 100, "50%", "auto"
+type LengthPercentage = number | `${number}%`; // e.g., 10, "25%"
+type LengthPercentageAuto = number | `${number}%` | "auto";
 
 // Geometry
 interface Size<T> {
@@ -333,7 +325,7 @@ interface Point<T> {
 }
 
 // Available space for layout computation
-type AvailableSpace = { Definite: number } | "MinContent" | "MaxContent";
+type AvailableSpace = number | "MinContent" | "MaxContent";
 
 // Measure function for custom content measurement
 type MeasureFunction = (
@@ -354,7 +346,7 @@ const textNode = tree.newLeafWithContext(textStyle, { text: "Hello, World!" });
 
 tree.computeLayoutWithMeasure(
   rootNode,
-  { width: { Definite: 800 }, height: "MaxContent" },
+  { width: 800, height: "MaxContent" },
   (known, available, node, context, style) => {
     if (context?.text) {
       // Your text measurement logic here
@@ -399,7 +391,7 @@ const rowStyle = new Style();
 rowStyle.display = Display.Flex;
 rowStyle.flexDirection = FlexDirection.Row;
 rowStyle.justifyContent = JustifyContent.SpaceBetween;
-rowStyle.gap = { width: { Length: 10 }, height: { Length: 0 } };
+rowStyle.gap = { width: 10, height: 0 };
 ```
 
 ### Absolute Positioning
@@ -407,13 +399,8 @@ rowStyle.gap = { width: { Length: 10 }, height: { Length: 0 } };
 ```javascript
 const absoluteStyle = new Style();
 absoluteStyle.position = Position.Absolute;
-absoluteStyle.inset = {
-  left: { Length: 10 },
-  top: { Length: 10 },
-  right: "Auto",
-  bottom: "Auto",
-};
-absoluteStyle.size = { width: { Length: 100 }, height: { Length: 50 } };
+absoluteStyle.inset = { left: 10, top: 10, right: "auto", bottom: "auto" };
+absoluteStyle.size = { width: 100, height: 50 };
 ```
 
 ### Percentage Sizing
@@ -421,8 +408,8 @@ absoluteStyle.size = { width: { Length: 100 }, height: { Length: 50 } };
 ```javascript
 const percentStyle = new Style();
 percentStyle.size = {
-  width: { Percent: 50 }, // 50% of parent
-  height: { Percent: 100 }, // 100% of parent
+  width: "50%", // 50% of parent
+  height: "100%", // 100% of parent
 };
 ```
 
@@ -430,7 +417,7 @@ percentStyle.size = {
 
 ```bash
 # Clone the repository
-git clone https://github.com/user/taffy-js.git
+git clone https://github.com/ByteLandTechnology/taffy-js.git
 cd taffy-js
 
 # Install dependencies
