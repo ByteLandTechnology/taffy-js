@@ -1,6 +1,6 @@
 {
   "name": "taffy-js",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "WebAssembly bindings for Taffy layout library",
   "keywords": [
     "layout",
@@ -40,7 +40,7 @@
   ],
   "scripts": {
     "build": "npm run build:wasm && npm run build:ts && npm run docs",
-    "build:wasm": "wasm-pack build --release --target web && npm run patch-dts",
+    "build:wasm": "wasm-pack build --release --target web && rm -f pkg/.gitignore && npm run patch-dts",
     "build:ts": "tsc",
     "build:dev": "wasm-pack build --dev --target web && npm run patch-dts && npm run build:ts",
     "docs": "typedoc && prettier --write docs",
