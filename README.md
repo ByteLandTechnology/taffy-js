@@ -329,7 +329,7 @@ type AvailableSpace = number | "minContent" | "maxContent";
 
 // Measure function for custom content measurement
 type MeasureFunction = (
-  knownDimensions: Size<number | null>,
+  knownDimensions: Size<number | undefined>,
   availableSpace: Size<AvailableSpace>,
   node: bigint,
   context: any,

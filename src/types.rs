@@ -203,7 +203,7 @@ export interface Size<T> {
  * custom sizing based on their content (e.g., text nodes that need text measurement).
  *
  * @param knownDimensions - Dimensions already determined by constraints. Each dimension
- *                          is `number` if known, or `null` if needs to be measured.
+ *                          is `number` if known, or `undefined` if needs to be measured.
  * @param availableSpace - The available space constraints for the node. Can be definite
  *                         pixels, "minContent", or "maxContent".
  * @param node - The node ID (`bigint`) of the node being measured
@@ -253,7 +253,7 @@ export interface Size<T> {
  * ```
  */
 export type MeasureFunction = (
-  knownDimensions: Size<number | null>,
+  knownDimensions: Size<number | undefined>,
   availableSpace: Size<AvailableSpace>,
   node: bigint,
   context: any,
