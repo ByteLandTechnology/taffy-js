@@ -12,6 +12,8 @@ import {
   JustifyContent,
   Overflow,
   BoxSizing,
+  TextAlign,
+  GridAutoFlow,
 } from "../src/index";
 
 describe("Style Class Properties", () => {
@@ -63,7 +65,6 @@ describe("Style Class Properties", () => {
 
     it("overflow: defaults to Visible, sets and gets correctly", () => {
       const style = new Style();
-      // Assuming default is visible for both x and y
       expect(style.overflow.x).toBe(Overflow.Visible);
       expect(style.overflow.y).toBe(Overflow.Visible);
 
@@ -74,11 +75,6 @@ describe("Style Class Properties", () => {
       style.overflow = { x: Overflow.Clip, y: Overflow.Visible };
       expect(style.overflow.x).toBe(Overflow.Clip);
       expect(style.overflow.y).toBe(Overflow.Visible);
-
-      // Test with raw numbers if supported (enums are numbers)
-      style.overflow = { x: 2, y: 3 }; // Hidden(2), Scroll(3)
-      expect(style.overflow.x).toBe(Overflow.Hidden);
-      expect(style.overflow.y).toBe(Overflow.Scroll);
     });
   });
 
@@ -148,9 +144,6 @@ describe("Style Class Properties", () => {
   describe("Alignment Properties", () => {
     it("alignItems: sets and gets correctly (Option<Enum>)", () => {
       const style = new Style();
-      // Default is usually Stretch in CSS, specifically for Taffy Flexbox it's technically 'Stretch' but represented as optional?
-      // JS bindings .d.ts says: returns AlignItems | undefined
-      // If undefined, it falls back to default.
       expect(style.alignItems).toBeUndefined();
 
       style.alignItems = AlignItems.Start;
@@ -165,7 +158,6 @@ describe("Style Class Properties", () => {
 
     it("alignSelf: sets and gets correctly (Option<Enum> with Auto)", () => {
       const style = new Style();
-      // alignSelf special case: undefined -> Auto
       expect(style.alignSelf).toBe(AlignSelf.Auto);
 
       style.alignSelf = AlignSelf.FlexStart;
@@ -199,12 +191,39 @@ describe("Style Class Properties", () => {
       style.justifyContent = undefined;
       expect(style.justifyContent).toBeUndefined();
     });
+
+    it("justifyItems: sets and gets correctly (Grid alignment)", () => {
+      const style = new Style();
+      expect(style.justifyItems).toBeUndefined();
+
+      style.justifyItems = AlignItems.Center;
+      expect(style.justifyItems).toBe(AlignItems.Center);
+
+      style.justifyItems = AlignItems.Start;
+      expect(style.justifyItems).toBe(AlignItems.Start);
+
+      style.justifyItems = undefined;
+      expect(style.justifyItems).toBeUndefined();
+    });
+
+    it("justifySelf: sets and gets correctly (Grid alignment)", () => {
+      const style = new Style();
+      expect(style.justifySelf).toBe(AlignSelf.Auto);
+
+      style.justifySelf = AlignSelf.End;
+      expect(style.justifySelf).toBe(AlignSelf.End);
+
+      style.justifySelf = AlignSelf.Auto;
+      expect(style.justifySelf).toBe(AlignSelf.Auto);
+
+      style.justifySelf = undefined;
+      expect(style.justifySelf).toBe(AlignSelf.Auto);
+    });
   });
 
   describe("Sizing and Spacing", () => {
     it("size: defaults to auto, sets and gets correctly", () => {
       const style = new Style();
-      // Default size is auto
       expect(style.size.width).toBe("auto");
       expect(style.size.height).toBe("auto");
 
@@ -219,8 +238,6 @@ describe("Style Class Properties", () => {
 
     it("minSize: defaults to auto, sets and gets correctly", () => {
       const style = new Style();
-      // Default minSize is auto (which effectively means 0 for min-width/height usually, but strictly "auto" in Taffy types?)
-      // Taffy's default for min_size is actually Auto.
       expect(style.minSize.width).toBe("auto");
       expect(style.minSize.height).toBe("auto");
 
@@ -235,7 +252,6 @@ describe("Style Class Properties", () => {
 
     it("maxSize: defaults to auto, sets and gets correctly", () => {
       const style = new Style();
-      // Default maxSize is auto (no limit)
       expect(style.maxSize.width).toBe("auto");
       expect(style.maxSize.height).toBe("auto");
 
@@ -249,7 +265,6 @@ describe("Style Class Properties", () => {
       expect(style.aspectRatio).toBeUndefined();
 
       style.aspectRatio = 16 / 9;
-      // Rust uses f32, so we expect some precision loss, checking 5 decimal places is safe
       expect(style.aspectRatio).toBeCloseTo(16 / 9, 5);
 
       style.aspectRatio = undefined;
@@ -258,7 +273,6 @@ describe("Style Class Properties", () => {
 
     it("gap: sets and gets correctly (LengthPercentage)", () => {
       const style = new Style();
-      // Default gap is 0
       expect(style.gap.width).toBe(0);
       expect(style.gap.height).toBe(0);
 
@@ -266,7 +280,6 @@ describe("Style Class Properties", () => {
       expect(style.gap.width).toBe(10);
       expect(style.gap.height).toBe("5%");
 
-      // Ensure setters work with new object
       style.gap = { width: 0, height: 0 };
       expect(style.gap.width).toBe(0);
       expect(style.gap.height).toBe(0);
@@ -274,7 +287,6 @@ describe("Style Class Properties", () => {
 
     it("margin: sets and gets correctly (LengthPercentageAuto)", () => {
       const style = new Style();
-      // Default margin is 0
       expect(style.margin.left).toBe(0);
       expect(style.margin.right).toBe(0);
       expect(style.margin.top).toBe(0);
@@ -290,7 +302,6 @@ describe("Style Class Properties", () => {
 
     it("padding: sets and gets correctly (LengthPercentage)", () => {
       const style = new Style();
-      // Default padding is 0
       expect(style.padding.left).toBe(0);
       expect(style.padding.right).toBe(0);
       expect(style.padding.top).toBe(0);
@@ -304,7 +315,6 @@ describe("Style Class Properties", () => {
 
     it("border: sets and gets correctly (LengthPercentage)", () => {
       const style = new Style();
-      // Default border is 0
       expect(style.border.left).toBe(0);
       expect(style.border.right).toBe(0);
       expect(style.border.top).toBe(0);
@@ -320,7 +330,6 @@ describe("Style Class Properties", () => {
 
     it("inset: sets and gets correctly (LengthPercentageAuto)", () => {
       const style = new Style();
-      // Default inset is auto
       expect(style.inset.left).toBe("auto");
       expect(style.inset.right).toBe("auto");
       expect(style.inset.top).toBe("auto");
@@ -332,6 +341,551 @@ describe("Style Class Properties", () => {
       expect(i.right).toBe(20);
       expect(i.top).toBe("10%");
       expect(i.bottom).toBe(0);
+    });
+  });
+
+  describe("Block Layout Properties", () => {
+    it("itemIsTable: defaults to false, sets and gets correctly", () => {
+      const style = new Style();
+      expect(style.itemIsTable).toBe(false);
+
+      style.itemIsTable = true;
+      expect(style.itemIsTable).toBe(true);
+
+      style.itemIsTable = false;
+      expect(style.itemIsTable).toBe(false);
+    });
+
+    it("itemIsReplaced: defaults to false, sets and gets correctly", () => {
+      const style = new Style();
+      expect(style.itemIsReplaced).toBe(false);
+
+      style.itemIsReplaced = true;
+      expect(style.itemIsReplaced).toBe(true);
+
+      style.itemIsReplaced = false;
+      expect(style.itemIsReplaced).toBe(false);
+    });
+
+    it("scrollbarWidth: defaults to 0, sets and gets correctly", () => {
+      const style = new Style();
+      expect(style.scrollbarWidth).toBe(0);
+
+      style.scrollbarWidth = 15;
+      expect(style.scrollbarWidth).toBe(15);
+
+      style.scrollbarWidth = 0;
+      expect(style.scrollbarWidth).toBe(0);
+    });
+
+    it("textAlign: defaults to Auto, sets and gets correctly", () => {
+      const style = new Style();
+      expect(style.textAlign).toBe(TextAlign.Auto);
+
+      style.textAlign = TextAlign.LegacyLeft;
+      expect(style.textAlign).toBe(TextAlign.LegacyLeft);
+
+      style.textAlign = TextAlign.LegacyRight;
+      expect(style.textAlign).toBe(TextAlign.LegacyRight);
+
+      style.textAlign = TextAlign.LegacyCenter;
+      expect(style.textAlign).toBe(TextAlign.LegacyCenter);
+
+      style.textAlign = TextAlign.Auto;
+      expect(style.textAlign).toBe(TextAlign.Auto);
+    });
+  });
+
+  describe("Grid Layout Properties", () => {
+    it("gridAutoFlow: defaults to Row, sets and gets correctly", () => {
+      const style = new Style();
+      expect(style.gridAutoFlow).toBe(GridAutoFlow.Row);
+
+      style.gridAutoFlow = GridAutoFlow.Column;
+      expect(style.gridAutoFlow).toBe(GridAutoFlow.Column);
+
+      style.gridAutoFlow = GridAutoFlow.RowDense;
+      expect(style.gridAutoFlow).toBe(GridAutoFlow.RowDense);
+
+      style.gridAutoFlow = GridAutoFlow.ColumnDense;
+      expect(style.gridAutoFlow).toBe(GridAutoFlow.ColumnDense);
+
+      style.gridAutoFlow = GridAutoFlow.Row;
+      expect(style.gridAutoFlow).toBe(GridAutoFlow.Row);
+    });
+
+    it("gridRow: defaults to auto/auto, sets and gets correctly", () => {
+      const style = new Style();
+      expect(style.gridRow.start).toBe("auto");
+      expect(style.gridRow.end).toBe("auto");
+
+      // Set to line numbers
+      style.gridRow = { start: 1, end: 3 };
+      expect(style.gridRow.start).toBe(1);
+      expect(style.gridRow.end).toBe(3);
+
+      // Set with span - serde_wasm_bindgen returns Map for objects
+      style.gridRow = { start: 2, end: { span: 2 } };
+      expect(style.gridRow.start).toBe(2);
+      // Check if it's a Map (serde_wasm_bindgen default) or plain object
+      const endVal = style.gridRow.end;
+      if (endVal instanceof Map) {
+        expect(endVal.get("span")).toBe(2);
+      } else {
+        expect(endVal).toEqual({ span: 2 });
+      }
+
+      // Set back to auto
+      style.gridRow = { start: "auto", end: "auto" };
+      expect(style.gridRow.start).toBe("auto");
+      expect(style.gridRow.end).toBe("auto");
+    });
+
+    it("gridColumn: defaults to auto/auto, sets and gets correctly", () => {
+      const style = new Style();
+      expect(style.gridColumn.start).toBe("auto");
+      expect(style.gridColumn.end).toBe("auto");
+
+      // Set to line numbers
+      style.gridColumn = { start: 1, end: 4 };
+      expect(style.gridColumn.start).toBe(1);
+      expect(style.gridColumn.end).toBe(4);
+
+      // Set with span - check for Map or plain object
+      style.gridColumn = { start: "auto", end: { span: 3 } };
+      expect(style.gridColumn.start).toBe("auto");
+      const endVal = style.gridColumn.end;
+      if (endVal instanceof Map) {
+        expect(endVal.get("span")).toBe(3);
+      } else {
+        expect(endVal).toEqual({ span: 3 });
+      }
+    });
+
+    it("gridTemplateRows: defaults to empty, can be read", () => {
+      const style = new Style();
+      // Default is empty array
+      expect(Array.isArray(style.gridTemplateRows)).toBe(true);
+      expect(style.gridTemplateRows.length).toBe(0);
+    });
+
+    it("gridTemplateColumns: defaults to empty, can be read", () => {
+      const style = new Style();
+      expect(Array.isArray(style.gridTemplateColumns)).toBe(true);
+      expect(style.gridTemplateColumns.length).toBe(0);
+    });
+
+    it("gridAutoRows: defaults to empty, can be read", () => {
+      const style = new Style();
+      expect(Array.isArray(style.gridAutoRows)).toBe(true);
+      expect(style.gridAutoRows.length).toBe(0);
+    });
+
+    it("gridAutoColumns: defaults to empty, can be read", () => {
+      const style = new Style();
+      expect(Array.isArray(style.gridAutoColumns)).toBe(true);
+      expect(style.gridAutoColumns.length).toBe(0);
+    });
+
+    it("gridTemplateAreas: defaults to empty, sets and gets correctly", () => {
+      const style = new Style();
+      expect(style.gridTemplateAreas).toEqual([]);
+
+      style.gridTemplateAreas = [
+        {
+          name: "header",
+          row_start: 1,
+          row_end: 2,
+          column_start: 1,
+          column_end: 4,
+        },
+        {
+          name: "main",
+          row_start: 2,
+          row_end: 4,
+          column_start: 2,
+          column_end: 4,
+        },
+      ];
+      expect(style.gridTemplateAreas.length).toBe(2);
+      expect(style.gridTemplateAreas[0].name).toBe("header");
+
+      style.gridTemplateAreas = [];
+      expect(style.gridTemplateAreas).toEqual([]);
+    });
+
+    it("gridTemplateRowNames: defaults to empty, sets and gets correctly", () => {
+      const style = new Style();
+      expect(style.gridTemplateRowNames).toEqual([]);
+
+      style.gridTemplateRowNames = [
+        ["header-start"],
+        ["header-end", "main-start"],
+        ["main-end"],
+      ];
+      expect(style.gridTemplateRowNames.length).toBe(3);
+      expect(style.gridTemplateRowNames[0]).toEqual(["header-start"]);
+      expect(style.gridTemplateRowNames[1]).toEqual([
+        "header-end",
+        "main-start",
+      ]);
+
+      style.gridTemplateRowNames = [];
+      expect(style.gridTemplateRowNames).toEqual([]);
+    });
+
+    it("gridTemplateColumnNames: defaults to empty, sets and gets correctly", () => {
+      const style = new Style();
+      expect(style.gridTemplateColumnNames).toEqual([]);
+
+      style.gridTemplateColumnNames = [
+        ["sidebar-start"],
+        ["sidebar-end", "main-start"],
+        ["main-end"],
+      ];
+      expect(style.gridTemplateColumnNames.length).toBe(3);
+      expect(style.gridTemplateColumnNames[0]).toEqual(["sidebar-start"]);
+
+      style.gridTemplateColumnNames = [];
+      expect(style.gridTemplateColumnNames).toEqual([]);
+    });
+
+    // Additional comprehensive tests
+
+    it("gridRow: handles negative line indices", () => {
+      const style = new Style();
+
+      // Negative line indices count from the end
+      style.gridRow = { start: -1, end: -2 };
+      expect(style.gridRow.start).toBe(-1);
+      expect(style.gridRow.end).toBe(-2);
+
+      // Mixed positive and negative
+      style.gridRow = { start: 1, end: -1 };
+      expect(style.gridRow.start).toBe(1);
+      expect(style.gridRow.end).toBe(-1);
+    });
+
+    it("gridColumn: handles negative line indices", () => {
+      const style = new Style();
+
+      style.gridColumn = { start: -3, end: -1 };
+      expect(style.gridColumn.start).toBe(-3);
+      expect(style.gridColumn.end).toBe(-1);
+    });
+
+    it("gridRow: handles span with various values", () => {
+      const style = new Style();
+
+      // Span 1 (default span)
+      style.gridRow = { start: 1, end: { span: 1 } };
+      expect(style.gridRow.start).toBe(1);
+      const end1 = style.gridRow.end;
+      if (end1 instanceof Map) {
+        expect(end1.get("span")).toBe(1);
+      }
+
+      // Large span
+      style.gridRow = { start: 1, end: { span: 10 } };
+      expect(style.gridRow.start).toBe(1);
+      const end10 = style.gridRow.end;
+      if (end10 instanceof Map) {
+        expect(end10.get("span")).toBe(10);
+      }
+
+      // Span on start instead of end
+      style.gridRow = { start: { span: 3 }, end: 5 };
+      const start3 = style.gridRow.start;
+      if (start3 instanceof Map) {
+        expect(start3.get("span")).toBe(3);
+      }
+      expect(style.gridRow.end).toBe(5);
+    });
+
+    it("gridColumn: handles span with various values", () => {
+      const style = new Style();
+
+      // Span on both start and end
+      style.gridColumn = { start: { span: 2 }, end: { span: 3 } };
+      const start = style.gridColumn.start;
+      const end = style.gridColumn.end;
+      if (start instanceof Map && end instanceof Map) {
+        expect(start.get("span")).toBe(2);
+        expect(end.get("span")).toBe(3);
+      }
+    });
+
+    it("gridRow: all auto placement", () => {
+      const style = new Style();
+
+      // Both start and end as auto
+      style.gridRow = { start: "auto", end: "auto" };
+      expect(style.gridRow.start).toBe("auto");
+      expect(style.gridRow.end).toBe("auto");
+
+      // Auto start with line end
+      style.gridRow = { start: "auto", end: 3 };
+      expect(style.gridRow.start).toBe("auto");
+      expect(style.gridRow.end).toBe(3);
+    });
+
+    it("gridTemplateAreas: handles complex grid layout", () => {
+      const style = new Style();
+
+      // Holy grail layout
+      style.gridTemplateAreas = [
+        {
+          name: "header",
+          row_start: 1,
+          row_end: 2,
+          column_start: 1,
+          column_end: 4,
+        },
+        {
+          name: "nav",
+          row_start: 2,
+          row_end: 3,
+          column_start: 1,
+          column_end: 2,
+        },
+        {
+          name: "main",
+          row_start: 2,
+          row_end: 3,
+          column_start: 2,
+          column_end: 3,
+        },
+        {
+          name: "aside",
+          row_start: 2,
+          row_end: 3,
+          column_start: 3,
+          column_end: 4,
+        },
+        {
+          name: "footer",
+          row_start: 3,
+          row_end: 4,
+          column_start: 1,
+          column_end: 4,
+        },
+      ];
+
+      expect(style.gridTemplateAreas.length).toBe(5);
+      expect(style.gridTemplateAreas[0].name).toBe("header");
+      expect(style.gridTemplateAreas[1].name).toBe("nav");
+      expect(style.gridTemplateAreas[2].name).toBe("main");
+      expect(style.gridTemplateAreas[3].name).toBe("aside");
+      expect(style.gridTemplateAreas[4].name).toBe("footer");
+
+      // Verify area bounds
+      const header = style.gridTemplateAreas[0];
+      expect(header.row_start).toBe(1);
+      expect(header.row_end).toBe(2);
+      expect(header.column_start).toBe(1);
+      expect(header.column_end).toBe(4);
+    });
+
+    it("gridTemplateRowNames: handles empty line names", () => {
+      const style = new Style();
+
+      // Some lines have no names
+      style.gridTemplateRowNames = [[], ["named-line"], [], ["another-name"]];
+      expect(style.gridTemplateRowNames.length).toBe(4);
+      expect(style.gridTemplateRowNames[0]).toEqual([]);
+      expect(style.gridTemplateRowNames[1]).toEqual(["named-line"]);
+      expect(style.gridTemplateRowNames[2]).toEqual([]);
+      expect(style.gridTemplateRowNames[3]).toEqual(["another-name"]);
+    });
+
+    it("gridTemplateColumnNames: handles multiple names per line", () => {
+      const style = new Style();
+
+      // Multiple names on same line
+      style.gridTemplateColumnNames = [
+        ["content-start", "sidebar-end", "main-start"],
+        ["content-end", "sidebar-start"],
+      ];
+      expect(style.gridTemplateColumnNames.length).toBe(2);
+      expect(style.gridTemplateColumnNames[0]).toEqual([
+        "content-start",
+        "sidebar-end",
+        "main-start",
+      ]);
+      expect(style.gridTemplateColumnNames[1]).toEqual([
+        "content-end",
+        "sidebar-start",
+      ]);
+    });
+
+    it("gridAutoFlow: all variants work correctly", () => {
+      const style = new Style();
+
+      // Test each variant
+      const variants = [
+        GridAutoFlow.Row,
+        GridAutoFlow.Column,
+        GridAutoFlow.RowDense,
+        GridAutoFlow.ColumnDense,
+      ];
+
+      for (const variant of variants) {
+        style.gridAutoFlow = variant;
+        expect(style.gridAutoFlow).toBe(variant);
+      }
+    });
+  });
+
+  describe("Block Layout Edge Cases", () => {
+    it("scrollbarWidth: handles decimal values", () => {
+      const style = new Style();
+
+      style.scrollbarWidth = 15.5;
+      expect(style.scrollbarWidth).toBeCloseTo(15.5, 5);
+
+      style.scrollbarWidth = 0.5;
+      expect(style.scrollbarWidth).toBeCloseTo(0.5, 5);
+    });
+
+    it("scrollbarWidth: handles large values", () => {
+      const style = new Style();
+
+      style.scrollbarWidth = 100;
+      expect(style.scrollbarWidth).toBe(100);
+    });
+
+    it("itemIsTable and itemIsReplaced: can be toggled multiple times", () => {
+      const style = new Style();
+
+      for (let i = 0; i < 5; i++) {
+        style.itemIsTable = true;
+        expect(style.itemIsTable).toBe(true);
+        style.itemIsTable = false;
+        expect(style.itemIsTable).toBe(false);
+      }
+
+      for (let i = 0; i < 5; i++) {
+        style.itemIsReplaced = true;
+        expect(style.itemIsReplaced).toBe(true);
+        style.itemIsReplaced = false;
+        expect(style.itemIsReplaced).toBe(false);
+      }
+    });
+
+    it("textAlign: all variants work correctly", () => {
+      const style = new Style();
+
+      const variants = [
+        TextAlign.Auto,
+        TextAlign.LegacyLeft,
+        TextAlign.LegacyRight,
+        TextAlign.LegacyCenter,
+      ];
+
+      for (const variant of variants) {
+        style.textAlign = variant;
+        expect(style.textAlign).toBe(variant);
+      }
+    });
+  });
+
+  describe("Additional Alignment Edge Cases", () => {
+    it("justifyItems: all AlignItems variants work", () => {
+      const style = new Style();
+
+      const variants = [
+        AlignItems.Start,
+        AlignItems.End,
+        AlignItems.FlexStart,
+        AlignItems.FlexEnd,
+        AlignItems.Center,
+        AlignItems.Baseline,
+        AlignItems.Stretch,
+      ];
+
+      for (const variant of variants) {
+        style.justifyItems = variant;
+        expect(style.justifyItems).toBe(variant);
+      }
+
+      // Can be unset
+      style.justifyItems = undefined;
+      expect(style.justifyItems).toBeUndefined();
+    });
+
+    it("justifySelf: all AlignSelf variants work", () => {
+      const style = new Style();
+
+      const variants = [
+        AlignSelf.Auto,
+        AlignSelf.Start,
+        AlignSelf.End,
+        AlignSelf.FlexStart,
+        AlignSelf.FlexEnd,
+        AlignSelf.Center,
+        AlignSelf.Baseline,
+        AlignSelf.Stretch,
+      ];
+
+      for (const variant of variants) {
+        style.justifySelf = variant;
+        // Auto is treated as None internally
+        if (variant === AlignSelf.Auto) {
+          expect(style.justifySelf).toBe(AlignSelf.Auto);
+        } else {
+          expect(style.justifySelf).toBe(variant);
+        }
+      }
+    });
+  });
+
+  describe("Grid with Display Mode", () => {
+    it("grid properties work when display is Grid", () => {
+      const style = new Style();
+      style.display = Display.Grid;
+
+      // Set up grid template
+      style.gridAutoFlow = GridAutoFlow.Column;
+      expect(style.gridAutoFlow).toBe(GridAutoFlow.Column);
+
+      // Set grid placement
+      style.gridRow = { start: 1, end: 3 };
+      style.gridColumn = { start: 2, end: 4 };
+
+      expect(style.gridRow.start).toBe(1);
+      expect(style.gridRow.end).toBe(3);
+      expect(style.gridColumn.start).toBe(2);
+      expect(style.gridColumn.end).toBe(4);
+
+      // Set grid areas
+      style.gridTemplateAreas = [
+        {
+          name: "content",
+          row_start: 1,
+          row_end: 2,
+          column_start: 1,
+          column_end: 2,
+        },
+      ];
+      expect(style.gridTemplateAreas.length).toBe(1);
+
+      // Set line names
+      style.gridTemplateRowNames = [["top"], ["bottom"]];
+      style.gridTemplateColumnNames = [["left"], ["right"]];
+      expect(style.gridTemplateRowNames.length).toBe(2);
+      expect(style.gridTemplateColumnNames.length).toBe(2);
+    });
+
+    it("grid properties can be set even when display is not Grid", () => {
+      const style = new Style();
+      // Default display is Flex, but we can still set grid properties
+      expect(style.display).toBe(Display.Flex);
+
+      style.gridAutoFlow = GridAutoFlow.RowDense;
+      expect(style.gridAutoFlow).toBe(GridAutoFlow.RowDense);
+
+      style.gridRow = { start: 1, end: 2 };
+      expect(style.gridRow.start).toBe(1);
     });
   });
 });

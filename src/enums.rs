@@ -577,3 +577,105 @@ impl From<taffy::style::BoxSizing> for JsBoxSizing {
         }
     }
 }
+
+// =============================================================================
+// Text Align
+// =============================================================================
+
+/// Text alignment enumeration (for block layout)
+///
+/// Used by block layout to implement the legacy behaviour of `<center>` and
+/// `<div align="left | right | center">`.
+///
+/// @example
+/// ```typescript
+/// import { TextAlign } from 'taffy-js';
+///
+/// style.textAlign = TextAlign.LegacyCenter;  // Center block children
+/// ```
+#[wasm_bindgen(js_name = TextAlign)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum JsTextAlign {
+    /// No special legacy text align behaviour
+    Auto = 0,
+    /// Corresponds to `-webkit-left` or `-moz-left` in browsers
+    LegacyLeft = 1,
+    /// Corresponds to `-webkit-right` or `-moz-right` in browsers
+    LegacyRight = 2,
+    /// Corresponds to `-webkit-center` or `-moz-center` in browsers
+    LegacyCenter = 3,
+}
+
+impl From<JsTextAlign> for taffy::style::TextAlign {
+    fn from(val: JsTextAlign) -> Self {
+        match val {
+            JsTextAlign::Auto => taffy::style::TextAlign::Auto,
+            JsTextAlign::LegacyLeft => taffy::style::TextAlign::LegacyLeft,
+            JsTextAlign::LegacyRight => taffy::style::TextAlign::LegacyRight,
+            JsTextAlign::LegacyCenter => taffy::style::TextAlign::LegacyCenter,
+        }
+    }
+}
+
+impl From<taffy::style::TextAlign> for JsTextAlign {
+    fn from(val: taffy::style::TextAlign) -> Self {
+        match val {
+            taffy::style::TextAlign::Auto => JsTextAlign::Auto,
+            taffy::style::TextAlign::LegacyLeft => JsTextAlign::LegacyLeft,
+            taffy::style::TextAlign::LegacyRight => JsTextAlign::LegacyRight,
+            taffy::style::TextAlign::LegacyCenter => JsTextAlign::LegacyCenter,
+        }
+    }
+}
+
+// =============================================================================
+// Grid Auto Flow
+// =============================================================================
+
+/// Grid auto flow enumeration
+///
+/// Controls whether grid items are placed row-wise or column-wise, and whether
+/// the sparse or dense packing algorithm is used.
+///
+/// @example
+/// ```typescript
+/// import { GridAutoFlow } from 'taffy-js';
+///
+/// style.gridAutoFlow = GridAutoFlow.Row;       // Fill rows first
+/// style.gridAutoFlow = GridAutoFlow.Column;    // Fill columns first
+/// style.gridAutoFlow = GridAutoFlow.RowDense;  // Fill rows, pack densely
+/// ```
+#[wasm_bindgen(js_name = GridAutoFlow)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum JsGridAutoFlow {
+    /// Items are placed by filling each row in turn, adding new rows as necessary
+    Row = 0,
+    /// Items are placed by filling each column in turn, adding new columns as necessary
+    Column = 1,
+    /// Combines `Row` with the dense packing algorithm
+    RowDense = 2,
+    /// Combines `Column` with the dense packing algorithm
+    ColumnDense = 3,
+}
+
+impl From<JsGridAutoFlow> for taffy::style::GridAutoFlow {
+    fn from(val: JsGridAutoFlow) -> Self {
+        match val {
+            JsGridAutoFlow::Row => taffy::style::GridAutoFlow::Row,
+            JsGridAutoFlow::Column => taffy::style::GridAutoFlow::Column,
+            JsGridAutoFlow::RowDense => taffy::style::GridAutoFlow::RowDense,
+            JsGridAutoFlow::ColumnDense => taffy::style::GridAutoFlow::ColumnDense,
+        }
+    }
+}
+
+impl From<taffy::style::GridAutoFlow> for JsGridAutoFlow {
+    fn from(val: taffy::style::GridAutoFlow) -> Self {
+        match val {
+            taffy::style::GridAutoFlow::Row => JsGridAutoFlow::Row,
+            taffy::style::GridAutoFlow::Column => JsGridAutoFlow::Column,
+            taffy::style::GridAutoFlow::RowDense => JsGridAutoFlow::RowDense,
+            taffy::style::GridAutoFlow::ColumnDense => JsGridAutoFlow::ColumnDense,
+        }
+    }
+}

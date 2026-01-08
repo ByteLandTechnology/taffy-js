@@ -65,6 +65,7 @@ pub mod layout;
 pub mod style;
 pub mod tree;
 pub mod types;
+pub mod typescript;
 pub mod utils;
 
 // Re-export all public types for convenient access

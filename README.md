@@ -22,7 +22,7 @@ npm install taffy-js
 
 ## 🚀 Quick Start
 
-```javascript
+```typescript
 import {
   loadTaffy,
   TaffyTree,
@@ -147,26 +147,29 @@ class Style {
   // Layout Mode
   display: Display; // Block, Flex, Grid, None
   position: Position; // Relative, Absolute
+  boxSizing: BoxSizing; // BorderBox, ContentBox
+  overflow: Point<Overflow>; // Overflow handling
 
-  // Flexbox
+  // Flexbox Properties
   flexDirection: FlexDirection; // Row, Column, RowReverse, ColumnReverse
   flexWrap: FlexWrap; // NoWrap, Wrap, WrapReverse
   flexGrow: number; // Growth factor (default: 0)
   flexShrink: number; // Shrink factor (default: 1)
   flexBasis: Dimension; // Initial size
 
-  // Alignment
+  // Alignment Properties
   alignItems: AlignItems | undefined;
   alignSelf: AlignSelf | undefined;
   alignContent: AlignContent | undefined;
   justifyContent: JustifyContent | undefined;
+  justifyItems: AlignItems | undefined; // Grid container default justify
+  justifySelf: AlignSelf | undefined; // Grid item self-justify
 
   // Sizing
   size: Size<Dimension>; // Width and height
   minSize: Size<Dimension>; // Minimum constraints
   maxSize: Size<Dimension>; // Maximum constraints
   aspectRatio: number | undefined; // Width/height ratio
-  boxSizing: BoxSizing; // BorderBox, ContentBox
 
   // Spacing
   margin: Rect<LengthPercentageAuto>;
@@ -175,8 +178,25 @@ class Style {
   gap: Size<LengthPercentage>; // Row and column gap
   inset: Rect<LengthPercentageAuto>; // For absolute positioning
 
-  // Overflow
-  overflow: Point<Overflow>;
+  // Block Layout Properties
+  itemIsTable: boolean; // Is this a table element?
+  itemIsReplaced: boolean; // Is this a replaced element (img, video)?
+  textAlign: TextAlign; // Legacy text alignment
+  scrollbarWidth: number; // Scrollbar gutter width in pixels
+
+  // CSS Grid Container Properties
+  gridAutoFlow: GridAutoFlow; // Row, Column, RowDense, ColumnDense
+  gridTemplateRows: GridTrack[]; // Track sizing for rows
+  gridTemplateColumns: GridTrack[]; // Track sizing for columns
+  gridAutoRows: TrackSizing[]; // Size for implicit rows
+  gridAutoColumns: TrackSizing[]; // Size for implicit columns
+  gridTemplateAreas: GridArea[]; // Named grid areas
+  gridTemplateRowNames: string[][]; // Named lines between rows
+  gridTemplateColumnNames: string[][]; // Named lines between columns
+
+  // CSS Grid Item Properties
+  gridRow: Line<GridPlacement>; // grid-row (start/end)
+  gridColumn: Line<GridPlacement>; // grid-column (start/end)
 }
 ```
 
@@ -290,13 +310,25 @@ enum JustifyContent {
 }
 enum Overflow {
   Visible,
+  Clip,
   Hidden,
   Scroll,
-  Auto,
 }
 enum BoxSizing {
   BorderBox,
   ContentBox,
+}
+enum TextAlign {
+  Auto,
+  LegacyLeft,
+  LegacyRight,
+  LegacyCenter,
+}
+enum GridAutoFlow {
+  Row,
+  Column,
+  RowDense,
+  ColumnDense,
 }
 ```
 
@@ -327,6 +359,24 @@ interface Point<T> {
 // Available space for layout computation
 type AvailableSpace = number | "minContent" | "maxContent";
 
+// Grid Placement (CSS grid-row-start / grid-column-start)
+type GridPlacement = "auto" | number | { span: number };
+
+// Grid Line (CSS grid-row / grid-column shorthand)
+interface Line<T> {
+  start: T;
+  end: T;
+}
+
+// Grid Template Area
+interface GridArea {
+  name: string;
+  row_start: number;
+  row_end: number;
+  column_start: number;
+  column_end: number;
+}
+
 // Measure function for custom content measurement
 type MeasureFunction = (
   knownDimensions: Size<number | undefined>,
@@ -341,7 +391,7 @@ type MeasureFunction = (
 
 For text nodes or other content that needs dynamic measurement:
 
-```javascript
+```typescript
 const textNode = tree.newLeafWithContext(textStyle, { text: "Hello, World!" });
 
 tree.computeLayoutWithMeasure(
@@ -363,7 +413,7 @@ tree.computeLayoutWithMeasure(
 
 Methods that can fail throw a `TaffyError` as a JavaScript exception. Use try-catch to handle errors:
 
-```javascript
+```typescript
 try {
   const nodeId = tree.newLeaf(style);
   console.log("Created node:", nodeId);
@@ -386,7 +436,7 @@ Taffy-JS works in all modern browsers that support WebAssembly:
 
 ### Flexbox Row Layout
 
-```javascript
+```typescript
 const rowStyle = new Style();
 rowStyle.display = Display.Flex;
 rowStyle.flexDirection = FlexDirection.Row;
@@ -394,9 +444,46 @@ rowStyle.justifyContent = JustifyContent.SpaceBetween;
 rowStyle.gap = { width: 10, height: 0 };
 ```
 
+### CSS Grid Layout
+
+```typescript
+import { Style, Display, GridAutoFlow } from "taffy-js";
+
+const gridStyle = new Style();
+gridStyle.display = Display.Grid;
+gridStyle.gridAutoFlow = GridAutoFlow.Row;
+gridStyle.gap = { width: 10, height: 10 };
+
+// Grid item placement
+const itemStyle = new Style();
+itemStyle.gridRow = { start: 1, end: 3 }; // Spans 2 rows
+itemStyle.gridColumn = { start: 1, end: { span: 2 } }; // Spans 2 columns
+```
+
+### Grid Template Areas
+
+```typescript
+const gridStyle = new Style();
+gridStyle.display = Display.Grid;
+gridStyle.gridTemplateAreas = [
+  { name: "header", row_start: 1, row_end: 2, column_start: 1, column_end: 4 },
+  { name: "sidebar", row_start: 2, row_end: 4, column_start: 1, column_end: 2 },
+  { name: "main", row_start: 2, row_end: 4, column_start: 2, column_end: 4 },
+  { name: "footer", row_start: 4, row_end: 5, column_start: 1, column_end: 4 },
+];
+
+// Named grid lines
+gridStyle.gridTemplateRowNames = [
+  ["header-start"],
+  ["header-end", "content-start"],
+  ["content-end", "footer-start"],
+  ["footer-end"],
+];
+```
+
 ### Absolute Positioning
 
-```javascript
+```typescript
 const absoluteStyle = new Style();
 absoluteStyle.position = Position.Absolute;
 absoluteStyle.inset = { left: 10, top: 10, right: "auto", bottom: "auto" };
@@ -405,12 +492,21 @@ absoluteStyle.size = { width: 100, height: 50 };
 
 ### Percentage Sizing
 
-```javascript
+```typescript
 const percentStyle = new Style();
 percentStyle.size = {
   width: "50%", // 50% of parent
   height: "100%", // 100% of parent
 };
+```
+
+### Block Layout with Replaced Elements
+
+```typescript
+const imgStyle = new Style();
+imgStyle.itemIsReplaced = true;
+imgStyle.aspectRatio = 16 / 9; // 16:9 aspect ratio
+imgStyle.size = { width: "100%", height: "auto" };
 ```
 
 ## 🏗️ Building from Source

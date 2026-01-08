@@ -793,4 +793,483 @@ impl JsStyle {
             self.inner.inset = i.into();
         }
     }
+
+    // =========================================================================
+    // Block Layout Properties
+    // =========================================================================
+
+    /// Gets whether this item is a table
+    ///
+    /// Table children are handled specially in block layout.
+    ///
+    /// @returns - Whether the item is treated as a table
+    ///
+    /// @defaultValue - `false`
+    #[wasm_bindgen(getter, js_name = itemIsTable)]
+    pub fn item_is_table(&self) -> bool {
+        self.inner.item_is_table
+    }
+
+    /// Sets whether this item is a table
+    ///
+    /// @param val - Whether the item should be treated as a table
+    #[wasm_bindgen(setter, js_name = itemIsTable)]
+    pub fn set_item_is_table(&mut self, val: bool) {
+        self.inner.item_is_table = val;
+    }
+
+    /// Gets whether this item is a replaced element
+    ///
+    /// Replaced elements have special sizing behavior (e.g., `<img>`, `<video>`).
+    ///
+    /// @returns - Whether the item is a replaced element
+    ///
+    /// @defaultValue - `false`
+    #[wasm_bindgen(getter, js_name = itemIsReplaced)]
+    pub fn item_is_replaced(&self) -> bool {
+        self.inner.item_is_replaced
+    }
+
+    /// Sets whether this item is a replaced element
+    ///
+    /// @param val - Whether the item should be treated as a replaced element
+    #[wasm_bindgen(setter, js_name = itemIsReplaced)]
+    pub fn set_item_is_replaced(&mut self, val: bool) {
+        self.inner.item_is_replaced = val;
+    }
+
+    /// Gets the scrollbar width
+    ///
+    /// The width of the scrollbar gutter when `overflow` is set to `Scroll`.
+    ///
+    /// @returns - The scrollbar width in pixels
+    ///
+    /// @defaultValue - `0`
+    #[wasm_bindgen(getter, js_name = scrollbarWidth)]
+    pub fn scrollbar_width(&self) -> f32 {
+        self.inner.scrollbar_width
+    }
+
+    /// Sets the scrollbar width
+    ///
+    /// @param val - The scrollbar width in pixels
+    ///
+    /// @example
+    /// ```typescript
+    /// style.overflow = { x: Overflow.Scroll, y: Overflow.Scroll };
+    /// style.scrollbarWidth = 15;
+    /// ```
+    #[wasm_bindgen(setter, js_name = scrollbarWidth)]
+    pub fn set_scrollbar_width(&mut self, val: f32) {
+        self.inner.scrollbar_width = val;
+    }
+
+    /// Gets the text-align property
+    ///
+    /// Used by block layout to implement legacy text alignment behavior.
+    ///
+    /// @returns - The current [`TextAlign`](JsTextAlign) value
+    ///
+    /// @defaultValue - `TextAlign.Auto`
+    #[wasm_bindgen(getter, js_name = textAlign)]
+    pub fn text_align(&self) -> JsTextAlign {
+        self.inner.text_align.into()
+    }
+
+    /// Sets the text-align property
+    ///
+    /// @param val - The new text-align value
+    ///
+    /// @example
+    /// ```typescript
+    /// style.textAlign = TextAlign.LegacyCenter;
+    /// ```
+    #[wasm_bindgen(setter, js_name = textAlign)]
+    pub fn set_text_align(&mut self, val: JsTextAlign) {
+        self.inner.text_align = val.into();
+    }
+
+    // =========================================================================
+    // Additional Alignment Properties
+    // =========================================================================
+
+    /// Gets the justify-items property
+    ///
+    /// Defines the default justify-self for all children in the inline axis.
+    /// This is primarily used for CSS Grid layout.
+    ///
+    /// @returns - The current [`AlignItems`](JsAlignItems) value, or `undefined` if not set
+    #[wasm_bindgen(getter, js_name = justifyItems)]
+    pub fn justify_items(&self) -> Option<JsAlignItems> {
+        self.inner.justify_items.map(JsAlignItems::from)
+    }
+
+    /// Sets the justify-items property
+    ///
+    /// @param val - The new justify-items value, or `undefined` to use default
+    ///
+    /// @example
+    /// ```typescript
+    /// style.display = Display.Grid;
+    /// style.justifyItems = AlignItems.Center;
+    /// ```
+    #[wasm_bindgen(setter, js_name = justifyItems)]
+    pub fn set_justify_items(&mut self, val: JsOptionAlignItems) {
+        let val: JsValue = val.unchecked_into();
+        self.inner.justify_items = if val.is_undefined() {
+            None
+        } else if let Some(n) = val.as_f64() {
+            Some(unsafe { std::mem::transmute::<u8, JsAlignItems>(n as u8) }.into())
+        } else {
+            None
+        };
+    }
+
+    /// Gets the justify-self property
+    ///
+    /// Overrides the parent's justify-items for this specific element in the inline axis.
+    ///
+    /// @returns - The current [`AlignSelf`](JsAlignSelf) value (returns `Auto` if not set)
+    #[wasm_bindgen(getter, js_name = justifySelf)]
+    pub fn justify_self(&self) -> Option<JsAlignSelf> {
+        match self.inner.justify_self {
+            Some(v) => Some(JsAlignSelf::from(v)),
+            None => Some(JsAlignSelf::Auto),
+        }
+    }
+
+    /// Sets the justify-self property
+    ///
+    /// @param val - The new justify-self value, or `undefined`/`Auto` to inherit from parent
+    ///
+    /// @example
+    /// ```typescript
+    /// style.justifySelf = AlignSelf.End;
+    /// ```
+    #[wasm_bindgen(setter, js_name = justifySelf)]
+    pub fn set_justify_self(&mut self, val: JsOptionAlignSelf) {
+        let val: JsValue = val.unchecked_into();
+        self.inner.justify_self = if val.is_undefined() {
+            None
+        } else if let Some(n) = val.as_f64() {
+            let js_val = unsafe { std::mem::transmute::<u8, JsAlignSelf>(n as u8) };
+            match js_val {
+                JsAlignSelf::Auto => None,
+                _ => Some(js_val.into()),
+            }
+        } else {
+            None
+        };
+    }
+
+    // =========================================================================
+    // Grid Layout Properties
+    // =========================================================================
+
+    /// Gets the grid-auto-flow property
+    ///
+    /// Controls how auto-placed items are inserted into the grid.
+    ///
+    /// @returns - The current [`GridAutoFlow`](JsGridAutoFlow) value
+    ///
+    /// @defaultValue - `GridAutoFlow.Row`
+    #[wasm_bindgen(getter, js_name = gridAutoFlow)]
+    pub fn grid_auto_flow(&self) -> JsGridAutoFlow {
+        self.inner.grid_auto_flow.into()
+    }
+
+    /// Sets the grid-auto-flow property
+    ///
+    /// @param val - The new grid-auto-flow value
+    ///
+    /// @example
+    /// ```typescript
+    /// style.display = Display.Grid;
+    /// style.gridAutoFlow = GridAutoFlow.Column;
+    /// ```
+    #[wasm_bindgen(setter, js_name = gridAutoFlow)]
+    pub fn set_grid_auto_flow(&mut self, val: JsGridAutoFlow) {
+        self.inner.grid_auto_flow = val.into();
+    }
+
+    /// Gets the grid-row property
+    ///
+    /// Defines which row in the grid the item should start and end at.
+    /// Corresponds to CSS `grid-row` shorthand.
+    ///
+    /// @returns - A `Line<GridPlacement>` with start and end placements
+    #[wasm_bindgen(getter, js_name = gridRow)]
+    pub fn grid_row(&self) -> JsLineGridPlacement {
+        let dto: LineGridPlacementDto = self.inner.grid_row.clone().into();
+        serialize(&dto).unchecked_into()
+    }
+
+    /// Sets the grid-row property
+    ///
+    /// @param val - A Line object with start and end GridPlacement values
+    ///
+    /// @example
+    /// ```typescript
+    /// style.display = Display.Grid;
+    /// // CSS: grid-row: 1 / 3
+    /// style.gridRow = { start: 1, end: 3 };
+    /// // CSS: grid-row: 2 / span 2
+    /// style.gridRow = { start: 2, end: { span: 2 } };
+    /// ```
+    #[wasm_bindgen(setter, js_name = gridRow)]
+    pub fn set_grid_row(&mut self, val: JsLineGridPlacement) {
+        let val: JsValue = val.unchecked_into();
+        if let Ok(dto) = serde_wasm_bindgen::from_value::<LineGridPlacementDto>(val) {
+            self.inner.grid_row = dto.into();
+        }
+    }
+
+    /// Gets the grid-column property
+    ///
+    /// Defines which column in the grid the item should start and end at.
+    /// Corresponds to CSS `grid-column` shorthand.
+    ///
+    /// @returns - A `Line<GridPlacement>` with start and end placements
+    #[wasm_bindgen(getter, js_name = gridColumn)]
+    pub fn grid_column(&self) -> JsLineGridPlacement {
+        let dto: LineGridPlacementDto = self.inner.grid_column.clone().into();
+        serialize(&dto).unchecked_into()
+    }
+
+    /// Sets the grid-column property
+    ///
+    /// @param val - A Line object with start and end GridPlacement values
+    ///
+    /// @example
+    /// ```typescript
+    /// style.display = Display.Grid;
+    /// // CSS: grid-column: 1 / 4
+    /// style.gridColumn = { start: 1, end: 4 };
+    /// // CSS: grid-column: auto / span 3
+    /// style.gridColumn = { start: "auto", end: { span: 3 } };
+    /// ```
+    #[wasm_bindgen(setter, js_name = gridColumn)]
+    pub fn set_grid_column(&mut self, val: JsLineGridPlacement) {
+        let val: JsValue = val.unchecked_into();
+        if let Ok(dto) = serde_wasm_bindgen::from_value::<LineGridPlacementDto>(val) {
+            self.inner.grid_column = dto.into();
+        }
+    }
+
+    /// Gets the grid-template-rows property
+    ///
+    /// Defines the track sizing functions (heights) of the grid rows.
+    /// Returns Taffy's native serialization format.
+    ///
+    /// @returns - An array of `GridTrack` values
+    #[wasm_bindgen(getter, js_name = gridTemplateRows)]
+    pub fn grid_template_rows(&self) -> JsGridTracks {
+        serialize(&self.inner.grid_template_rows).unchecked_into()
+    }
+
+    /// Sets the grid-template-rows property
+    ///
+    /// @param val - An array of GridTrack objects (Taffy's serde format)
+    ///
+    /// @example
+    /// ```typescript
+    /// style.display = Display.Grid;
+    /// // Simple: use Taffy's serde format
+    /// style.gridTemplateRows = [
+    ///   { type: "Single", value: { min: { Length: 100 }, max: { Length: 100 } } },
+    ///   { type: "Single", value: { min: "Auto", max: { Fr: 1.0 } } }
+    /// ];
+    /// ```
+    #[wasm_bindgen(setter, js_name = gridTemplateRows)]
+    pub fn set_grid_template_rows(&mut self, val: JsGridTracks) {
+        let val: JsValue = val.unchecked_into();
+        if let Ok(tracks) = serde_wasm_bindgen::from_value(val) {
+            self.inner.grid_template_rows = tracks;
+        }
+    }
+
+    /// Gets the grid-template-columns property
+    ///
+    /// Defines the track sizing functions (widths) of the grid columns.
+    ///
+    /// @returns - An array of `GridTrack` values
+    #[wasm_bindgen(getter, js_name = gridTemplateColumns)]
+    pub fn grid_template_columns(&self) -> JsGridTracks {
+        serialize(&self.inner.grid_template_columns).unchecked_into()
+    }
+
+    /// Sets the grid-template-columns property
+    ///
+    /// @param val - An array of GridTrack objects
+    ///
+    /// @example
+    /// ```typescript
+    /// style.display = Display.Grid;
+    /// style.gridTemplateColumns = [
+    ///   { type: "Single", value: { min: { Length: 200 }, max: { Length: 200 } } },
+    ///   { type: "Single", value: { min: "Auto", max: { Fr: 1.0 } } },
+    ///   { type: "Single", value: { min: "Auto", max: { Fr: 1.0 } } }
+    /// ];
+    /// ```
+    #[wasm_bindgen(setter, js_name = gridTemplateColumns)]
+    pub fn set_grid_template_columns(&mut self, val: JsGridTracks) {
+        let val: JsValue = val.unchecked_into();
+        if let Ok(tracks) = serde_wasm_bindgen::from_value(val) {
+            self.inner.grid_template_columns = tracks;
+        }
+    }
+
+    /// Gets the grid-auto-rows property
+    ///
+    /// Defines the size of implicitly created rows.
+    ///
+    /// @returns - An array of track sizing functions
+    #[wasm_bindgen(getter, js_name = gridAutoRows)]
+    pub fn grid_auto_rows(&self) -> JsValue {
+        serialize(&self.inner.grid_auto_rows)
+    }
+
+    /// Sets the grid-auto-rows property
+    ///
+    /// @param val - An array of track sizing functions for implicit rows
+    ///
+    /// @example
+    /// ```typescript
+    /// style.display = Display.Grid;
+    /// style.gridAutoRows = [{ min: "Auto", max: "Auto" }];
+    /// ```
+    #[wasm_bindgen(setter, js_name = gridAutoRows)]
+    pub fn set_grid_auto_rows(&mut self, val: JsValue) {
+        if let Ok(tracks) = serde_wasm_bindgen::from_value(val) {
+            self.inner.grid_auto_rows = tracks;
+        }
+    }
+
+    /// Gets the grid-auto-columns property
+    ///
+    /// Defines the size of implicitly created columns.
+    ///
+    /// @returns - An array of track sizing functions
+    #[wasm_bindgen(getter, js_name = gridAutoColumns)]
+    pub fn grid_auto_columns(&self) -> JsValue {
+        serialize(&self.inner.grid_auto_columns)
+    }
+
+    /// Sets the grid-auto-columns property
+    ///
+    /// @param val - An array of track sizing functions for implicit columns
+    #[wasm_bindgen(setter, js_name = gridAutoColumns)]
+    pub fn set_grid_auto_columns(&mut self, val: JsValue) {
+        if let Ok(tracks) = serde_wasm_bindgen::from_value(val) {
+            self.inner.grid_auto_columns = tracks;
+        }
+    }
+
+    /// Gets the grid-template-areas property
+    ///
+    /// Defines named grid areas that can be referenced by grid items.
+    ///
+    /// @returns - An array of `GridArea` values
+    #[wasm_bindgen(getter, js_name = gridTemplateAreas)]
+    pub fn grid_template_areas(&self) -> JsGridAreas {
+        serialize(&self.inner.grid_template_areas).unchecked_into()
+    }
+
+    /// Sets the grid-template-areas property
+    ///
+    /// @param val - An array of named grid area definitions
+    ///
+    /// @example
+    /// ```typescript
+    /// style.display = Display.Grid;
+    /// style.gridTemplateAreas = [
+    ///   { name: "header", row_start: 1, row_end: 2, column_start: 1, column_end: 4 },
+    ///   { name: "main", row_start: 2, row_end: 4, column_start: 2, column_end: 4 }
+    /// ];
+    /// ```
+    #[wasm_bindgen(setter, js_name = gridTemplateAreas)]
+    pub fn set_grid_template_areas(&mut self, val: JsGridAreas) {
+        let val: JsValue = val.unchecked_into();
+        if let Ok(areas) = serde_wasm_bindgen::from_value(val) {
+            self.inner.grid_template_areas = areas;
+        }
+    }
+
+    /// Gets the grid-template-row-names property
+    ///
+    /// Defines the named lines between the rows.
+    ///
+    /// @returns - An array of arrays of line names
+    #[wasm_bindgen(getter, js_name = gridTemplateRowNames)]
+    pub fn grid_template_row_names(&self) -> JsGridLineNames {
+        let names: Vec<Vec<String>> = self
+            .inner
+            .grid_template_row_names
+            .iter()
+            .map(|v| {
+                v.iter()
+                    .map(|s| AsRef::<str>::as_ref(s).to_string())
+                    .collect()
+            })
+            .collect();
+        serialize(&names).unchecked_into()
+    }
+
+    /// Sets the grid-template-row-names property
+    ///
+    /// @param val - An array of arrays of line names
+    ///
+    /// @example
+    /// ```typescript
+    /// style.gridTemplateRowNames = [["header-start"], ["header-end", "main-start"], ["main-end"]];
+    /// ```
+    #[wasm_bindgen(setter, js_name = gridTemplateRowNames)]
+    pub fn set_grid_template_row_names(&mut self, val: JsGridLineNames) {
+        let val: JsValue = val.unchecked_into();
+        if let Ok(names) = serde_wasm_bindgen::from_value::<Vec<Vec<String>>>(val) {
+            self.inner.grid_template_row_names = names
+                .into_iter()
+                .map(|v| v.into_iter().map(|s| s.into()).collect())
+                .collect();
+        }
+    }
+
+    /// Gets the grid-template-column-names property
+    ///
+    /// Defines the named lines between the columns.
+    ///
+    /// @returns - An array of arrays of line names
+    #[wasm_bindgen(getter, js_name = gridTemplateColumnNames)]
+    pub fn grid_template_column_names(&self) -> JsGridLineNames {
+        let names: Vec<Vec<String>> = self
+            .inner
+            .grid_template_column_names
+            .iter()
+            .map(|v| {
+                v.iter()
+                    .map(|s| AsRef::<str>::as_ref(s).to_string())
+                    .collect()
+            })
+            .collect();
+        serialize(&names).unchecked_into()
+    }
+
+    /// Sets the grid-template-column-names property
+    ///
+    /// @param val - An array of arrays of line names
+    ///
+    /// @example
+    /// ```typescript
+    /// style.gridTemplateColumnNames = [["sidebar-start"], ["sidebar-end", "main-start"], ["main-end"]];
+    /// ```
+    #[wasm_bindgen(setter, js_name = gridTemplateColumnNames)]
+    pub fn set_grid_template_column_names(&mut self, val: JsGridLineNames) {
+        let val: JsValue = val.unchecked_into();
+        if let Ok(names) = serde_wasm_bindgen::from_value::<Vec<Vec<String>>>(val) {
+            self.inner.grid_template_column_names = names
+                .into_iter()
+                .map(|v| v.into_iter().map(|s| s.into()).collect())
+                .collect();
+        }
+    }
 }

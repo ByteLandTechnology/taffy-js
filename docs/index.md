@@ -15,9 +15,11 @@
 | [Display](enumerations/Display.md)               | Display mode enumeration                              |
 | [FlexDirection](enumerations/FlexDirection.md)   | Flex direction enumeration                            |
 | [FlexWrap](enumerations/FlexWrap.md)             | Flex wrap mode enumeration                            |
+| [GridAutoFlow](enumerations/GridAutoFlow.md)     | Grid auto flow enumeration                            |
 | [JustifyContent](enumerations/JustifyContent.md) | Main axis alignment enumeration                       |
 | [Overflow](enumerations/Overflow.md)             | Overflow handling enumeration                         |
 | [Position](enumerations/Position.md)             | Position mode enumeration                             |
+| [TextAlign](enumerations/TextAlign.md)           | Text alignment enumeration (for block layout)         |
 
 ## Classes
 
@@ -36,6 +38,7 @@
 | [DetailedGridItemsInfo](interfaces/DetailedGridItemsInfo.md)   | Information about a grid item's placement.          |
 | [DetailedGridTracksInfo](interfaces/DetailedGridTracksInfo.md) | Information about grid tracks (rows or columns).    |
 | [InitOutput](interfaces/InitOutput.md)                         | -                                                   |
+| [Line](interfaces/Line.md)                                     | Line type representing start and end positions.     |
 | [Point](interfaces/Point.md)                                   | Point with x and y coordinates/values.              |
 | [Rect](interfaces/Rect.md)                                     | Rectangle with left, right, top, and bottom values. |
 | [Size](interfaces/Size.md)                                     | Generic size type with width and height.            |
@@ -47,6 +50,7 @@
 | [AvailableSpace](type-aliases/AvailableSpace.md)             | Available space constraint for layout computation.                         |
 | [DetailedLayoutInfo](type-aliases/DetailedLayoutInfo.md)     | Detailed layout information (for grid layouts).                            |
 | [Dimension](type-aliases/Dimension.md)                       | Dimension type supporting length, percentage, or auto values.              |
+| [GridPlacement](type-aliases/GridPlacement.md)               | Grid placement type for positioning grid items.                            |
 | [InitInput](type-aliases/InitInput.md)                       | -                                                                          |
 | [LengthPercentage](type-aliases/LengthPercentage.md)         | Length or percentage value (no auto support).                              |
 | [LengthPercentageAuto](type-aliases/LengthPercentageAuto.md) | Length, percentage, or auto value.                                         |
