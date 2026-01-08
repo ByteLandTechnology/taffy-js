@@ -15,6 +15,8 @@ with a readable error message. It is thrown as a JavaScript exception on failure
 
 ```typescript
 try {
+  const tree = new TaffyTree();
+  const node = tree.newLeaf(new Style());
   tree.remove(node);
 } catch (e) {
   if (e instanceof TaffyError) {

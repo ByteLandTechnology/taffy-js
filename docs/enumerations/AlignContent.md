@@ -16,8 +16,9 @@ in a multi-line flex container. This corresponds to the CSS `align-content` prop
 ## Example
 
 ```typescript
-import { AlignContent, FlexWrap } from "taffy-js";
+import { Style, AlignContent, FlexWrap } from "taffy-js";
 
+const style = new Style();
 style.flexWrap = FlexWrap.Wrap;
 style.alignContent = AlignContent.SpaceBetween; // Distribute lines evenly
 ```

@@ -4,7 +4,14 @@
 
 [Taffy-JS API Documentation](../index.md) / Point
 
-# Interface: Point\<T\>
+# Type Alias: Point\<T\>
+
+```ts
+type Point<T> = {
+  x: T;
+  y: T;
+};
+```
 
 Point with x and y coordinates/values.
 

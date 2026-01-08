@@ -14,8 +14,9 @@ This corresponds to the CSS `align-self` property.
 ## Example
 
 ```typescript
-import { AlignSelf } from "taffy-js";
+import { Style, AlignSelf } from "taffy-js";
 
+const style = new Style();
 style.alignSelf = AlignSelf.Auto; // Use parent's align-items
 style.alignSelf = AlignSelf.Center; // Override to center this item
 ```

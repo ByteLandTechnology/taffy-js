@@ -151,6 +151,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.display = Display.Flex;
     /// ```
     #[wasm_bindgen(setter)]
@@ -177,6 +178,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.position = Position.Absolute;
     /// style.inset = { left: 10, top: 10, right: "auto", bottom: "auto" };
     /// ```
@@ -208,6 +210,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.flexDirection = FlexDirection.Column;
     /// ```
     #[wasm_bindgen(setter, js_name = flexDirection)]
@@ -234,6 +237,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.flexWrap = FlexWrap.Wrap;
     /// ```
     #[wasm_bindgen(setter, js_name = flexWrap)]
@@ -258,6 +262,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.flexGrow = 2;
     /// ```
     #[wasm_bindgen(setter, js_name = flexGrow)]
@@ -282,6 +287,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.flexShrink = 2;
     /// ```
     #[wasm_bindgen(setter, js_name = flexShrink)]
@@ -309,6 +315,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.alignItems = AlignItems.Center;
     /// ```
     #[wasm_bindgen(setter, js_name = alignItems)]
@@ -342,6 +349,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.alignSelf = AlignSelf.Stretch;
     /// ```
     #[wasm_bindgen(setter, js_name = alignSelf)]
@@ -376,6 +384,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.alignContent = AlignContent.SpaceBetween;
     /// ```
     #[wasm_bindgen(setter, js_name = alignContent)]
@@ -406,6 +415,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.justifyContent = JustifyContent.Center;
     /// ```
     #[wasm_bindgen(setter, js_name = justifyContent)]
@@ -440,6 +450,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.aspectRatio = 16 / 9;
     /// ```
     #[wasm_bindgen(setter, js_name = aspectRatio)]
@@ -472,6 +483,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.overflow = { x: Overflow.Hidden, y: Overflow.Scroll };
     /// ```
     #[wasm_bindgen(setter)]
@@ -500,6 +512,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.boxSizing = BoxSizing.ContentBox;
     /// ```
     #[wasm_bindgen(setter, js_name = boxSizing)]
@@ -524,6 +537,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.flexBasis = 100;
     /// ```
     #[wasm_bindgen(setter, js_name = flexBasis)]
@@ -556,6 +570,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.size = { width: 200, height: "100%" };
     /// ```
     #[wasm_bindgen(setter)]
@@ -593,6 +608,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.minSize = { width: 100, height: "auto" };
     /// ```
     #[wasm_bindgen(setter, js_name = minSize)]
@@ -621,6 +637,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.maxSize = { width: "auto", height: 500 };
     /// ```
     #[wasm_bindgen(setter, js_name = maxSize)]
@@ -657,6 +674,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.margin = { left: 10, right: 10, top: 5, bottom: 5 };
     /// ```
     #[wasm_bindgen(setter)]
@@ -689,6 +707,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.padding = { left: 20, right: 20, top: 10, bottom: 10 };
     /// ```
     #[wasm_bindgen(setter)]
@@ -721,6 +740,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.border = { left: 1, right: 1, top: 1, bottom: 1 };
     /// ```
     #[wasm_bindgen(setter)]
@@ -751,6 +771,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.gap = { width: 10, height: 10 };
     /// ```
     #[wasm_bindgen(setter)]
@@ -783,6 +804,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.position = Position.Absolute;
     /// style.inset = { left: 0, top: 0, right: "auto", bottom: "auto" };
     /// ```
@@ -856,6 +878,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.overflow = { x: Overflow.Scroll, y: Overflow.Scroll };
     /// style.scrollbarWidth = 15;
     /// ```
@@ -882,6 +905,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.textAlign = TextAlign.LegacyCenter;
     /// ```
     #[wasm_bindgen(setter, js_name = textAlign)]
@@ -910,6 +934,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.display = Display.Grid;
     /// style.justifyItems = AlignItems.Center;
     /// ```
@@ -944,6 +969,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.justifySelf = AlignSelf.End;
     /// ```
     #[wasm_bindgen(setter, js_name = justifySelf)]
@@ -984,6 +1010,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.display = Display.Grid;
     /// style.gridAutoFlow = GridAutoFlow.Column;
     /// ```
@@ -1010,6 +1037,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.display = Display.Grid;
     /// // CSS: grid-row: 1 / 3
     /// style.gridRow = { start: 1, end: 3 };
@@ -1042,6 +1070,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.display = Display.Grid;
     /// // CSS: grid-column: 1 / 4
     /// style.gridColumn = { start: 1, end: 4 };
@@ -1059,32 +1088,28 @@ impl JsStyle {
     /// Gets the grid-template-rows property
     ///
     /// Defines the track sizing functions (heights) of the grid rows.
-    /// Returns Taffy's native serialization format.
     ///
     /// @returns - An array of `GridTrack` values
     #[wasm_bindgen(getter, js_name = gridTemplateRows)]
-    pub fn grid_template_rows(&self) -> JsGridTracks {
-        serialize(&self.inner.grid_template_rows).unchecked_into()
+    pub fn grid_template_rows(&self) -> JsGridTemplateComponents {
+        let tracks: Vec<GridTemplateComponentDto> = self
+            .inner
+            .grid_template_rows
+            .iter()
+            .cloned()
+            .map(|t| t.into())
+            .collect();
+        serialize(&tracks).unchecked_into()
     }
 
     /// Sets the grid-template-rows property
     ///
-    /// @param val - An array of GridTrack objects (Taffy's serde format)
-    ///
-    /// @example
-    /// ```typescript
-    /// style.display = Display.Grid;
-    /// // Simple: use Taffy's serde format
-    /// style.gridTemplateRows = [
-    ///   { type: "Single", value: { min: { Length: 100 }, max: { Length: 100 } } },
-    ///   { type: "Single", value: { min: "Auto", max: { Fr: 1.0 } } }
-    /// ];
-    /// ```
+    /// @param val - An array of GridTrack objects
     #[wasm_bindgen(setter, js_name = gridTemplateRows)]
-    pub fn set_grid_template_rows(&mut self, val: JsGridTracks) {
+    pub fn set_grid_template_rows(&mut self, val: JsGridTemplateComponents) {
         let val: JsValue = val.unchecked_into();
-        if let Ok(tracks) = serde_wasm_bindgen::from_value(val) {
-            self.inner.grid_template_rows = tracks;
+        if let Ok(tracks) = serde_wasm_bindgen::from_value::<Vec<GridTemplateComponentDto>>(val) {
+            self.inner.grid_template_rows = tracks.into_iter().map(|t| t.into()).collect();
         }
     }
 
@@ -1094,8 +1119,15 @@ impl JsStyle {
     ///
     /// @returns - An array of `GridTrack` values
     #[wasm_bindgen(getter, js_name = gridTemplateColumns)]
-    pub fn grid_template_columns(&self) -> JsGridTracks {
-        serialize(&self.inner.grid_template_columns).unchecked_into()
+    pub fn grid_template_columns(&self) -> JsGridTemplateComponents {
+        let tracks: Vec<GridTemplateComponentDto> = self
+            .inner
+            .grid_template_columns
+            .iter()
+            .cloned()
+            .map(|t| t.into())
+            .collect();
+        serialize(&tracks).unchecked_into()
     }
 
     /// Sets the grid-template-columns property
@@ -1104,18 +1136,19 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.display = Display.Grid;
     /// style.gridTemplateColumns = [
-    ///   { type: "Single", value: { min: { Length: 200 }, max: { Length: 200 } } },
-    ///   { type: "Single", value: { min: "Auto", max: { Fr: 1.0 } } },
-    ///   { type: "Single", value: { min: "Auto", max: { Fr: 1.0 } } }
+    ///   { min: 200, max: 200 },
+    ///   { min: "auto", max: "1fr" },
+    ///   { min: "auto", max: "1fr" }
     /// ];
     /// ```
     #[wasm_bindgen(setter, js_name = gridTemplateColumns)]
-    pub fn set_grid_template_columns(&mut self, val: JsGridTracks) {
+    pub fn set_grid_template_columns(&mut self, val: JsGridTemplateComponents) {
         let val: JsValue = val.unchecked_into();
-        if let Ok(tracks) = serde_wasm_bindgen::from_value(val) {
-            self.inner.grid_template_columns = tracks;
+        if let Ok(tracks) = serde_wasm_bindgen::from_value::<Vec<GridTemplateComponentDto>>(val) {
+            self.inner.grid_template_columns = tracks.into_iter().map(|t| t.into()).collect();
         }
     }
 
@@ -1125,8 +1158,15 @@ impl JsStyle {
     ///
     /// @returns - An array of track sizing functions
     #[wasm_bindgen(getter, js_name = gridAutoRows)]
-    pub fn grid_auto_rows(&self) -> JsValue {
-        serialize(&self.inner.grid_auto_rows)
+    pub fn grid_auto_rows(&self) -> JsTrackSizingFunctions {
+        let tracks: Vec<TrackSizingFunctionDto> = self
+            .inner
+            .grid_auto_rows
+            .iter()
+            .cloned()
+            .map(|t| t.into())
+            .collect();
+        serialize(&tracks).unchecked_into()
     }
 
     /// Sets the grid-auto-rows property
@@ -1135,13 +1175,15 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.display = Display.Grid;
-    /// style.gridAutoRows = [{ min: "Auto", max: "Auto" }];
+    /// style.gridAutoRows = [{ min: "auto", max: "auto" }];
     /// ```
     #[wasm_bindgen(setter, js_name = gridAutoRows)]
-    pub fn set_grid_auto_rows(&mut self, val: JsValue) {
-        if let Ok(tracks) = serde_wasm_bindgen::from_value(val) {
-            self.inner.grid_auto_rows = tracks;
+    pub fn set_grid_auto_rows(&mut self, val: JsTrackSizingFunctions) {
+        let val: JsValue = val.unchecked_into();
+        if let Ok(tracks) = serde_wasm_bindgen::from_value::<Vec<TrackSizingFunctionDto>>(val) {
+            self.inner.grid_auto_rows = tracks.into_iter().map(|t| t.into()).collect();
         }
     }
 
@@ -1151,17 +1193,25 @@ impl JsStyle {
     ///
     /// @returns - An array of track sizing functions
     #[wasm_bindgen(getter, js_name = gridAutoColumns)]
-    pub fn grid_auto_columns(&self) -> JsValue {
-        serialize(&self.inner.grid_auto_columns)
+    pub fn grid_auto_columns(&self) -> JsTrackSizingFunctions {
+        let tracks: Vec<TrackSizingFunctionDto> = self
+            .inner
+            .grid_auto_columns
+            .iter()
+            .cloned()
+            .map(|t| t.into())
+            .collect();
+        serialize(&tracks).unchecked_into()
     }
 
     /// Sets the grid-auto-columns property
     ///
     /// @param val - An array of track sizing functions for implicit columns
     #[wasm_bindgen(setter, js_name = gridAutoColumns)]
-    pub fn set_grid_auto_columns(&mut self, val: JsValue) {
-        if let Ok(tracks) = serde_wasm_bindgen::from_value(val) {
-            self.inner.grid_auto_columns = tracks;
+    pub fn set_grid_auto_columns(&mut self, val: JsTrackSizingFunctions) {
+        let val: JsValue = val.unchecked_into();
+        if let Ok(tracks) = serde_wasm_bindgen::from_value::<Vec<TrackSizingFunctionDto>>(val) {
+            self.inner.grid_auto_columns = tracks.into_iter().map(|t| t.into()).collect();
         }
     }
 
@@ -1171,8 +1221,15 @@ impl JsStyle {
     ///
     /// @returns - An array of `GridArea` values
     #[wasm_bindgen(getter, js_name = gridTemplateAreas)]
-    pub fn grid_template_areas(&self) -> JsGridAreas {
-        serialize(&self.inner.grid_template_areas).unchecked_into()
+    pub fn grid_template_areas(&self) -> JsGridTemplateAreas {
+        let areas: Vec<crate::types::GridTemplateAreaDto> = self
+            .inner
+            .grid_template_areas
+            .iter()
+            .cloned()
+            .map(|a| a.into())
+            .collect();
+        serialize(&areas).unchecked_into()
     }
 
     /// Sets the grid-template-areas property
@@ -1181,17 +1238,20 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.display = Display.Grid;
     /// style.gridTemplateAreas = [
-    ///   { name: "header", row_start: 1, row_end: 2, column_start: 1, column_end: 4 },
-    ///   { name: "main", row_start: 2, row_end: 4, column_start: 2, column_end: 4 }
+    ///   { name: "header", rowStart: 1, rowEnd: 2, columnStart: 1, columnEnd: 4 },
+    ///   { name: "main", rowStart: 2, rowEnd: 4, columnStart: 2, columnEnd: 4 }
     /// ];
     /// ```
     #[wasm_bindgen(setter, js_name = gridTemplateAreas)]
-    pub fn set_grid_template_areas(&mut self, val: JsGridAreas) {
+    pub fn set_grid_template_areas(&mut self, val: JsGridTemplateAreas) {
         let val: JsValue = val.unchecked_into();
-        if let Ok(areas) = serde_wasm_bindgen::from_value(val) {
-            self.inner.grid_template_areas = areas;
+        if let Ok(areas) =
+            serde_wasm_bindgen::from_value::<Vec<crate::types::GridTemplateAreaDto>>(val)
+        {
+            self.inner.grid_template_areas = areas.into_iter().map(|a| a.into()).collect();
         }
     }
 
@@ -1221,6 +1281,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.gridTemplateRowNames = [["header-start"], ["header-end", "main-start"], ["main-end"]];
     /// ```
     #[wasm_bindgen(setter, js_name = gridTemplateRowNames)]
@@ -1260,6 +1321,7 @@ impl JsStyle {
     ///
     /// @example
     /// ```typescript
+    /// const style = new Style();
     /// style.gridTemplateColumnNames = [["sidebar-start"], ["sidebar-end", "main-start"], ["main-end"]];
     /// ```
     #[wasm_bindgen(setter, js_name = gridTemplateColumnNames)]

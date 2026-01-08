@@ -17,14 +17,16 @@
 //! - [`map_void_result`]: For results with no return value
 //! - [`map_bool_result`]: For results containing boolean values
 //!
-//! @example
-//! ```typescript
 //! try {
+//!   const tree = new TaffyTree();
+//!   const style = new Style();
 //!   const nodeId = tree.newLeaf(style);
 //!   console.log('Created node:', nodeId);
-//! } catch (error) {
-//!   // error is a TaffyError instance
-//!   console.error('Layout error:', error.message);
+//! } catch (e) {
+//!   // e is a TaffyError instance
+//!   if (e instanceof TaffyError) {
+//!     console.error('Layout error:', e.message);
+//!   }
 //! }
 //! ```
 
@@ -44,6 +46,8 @@ use wasm_bindgen::prelude::*;
 /// @example
 /// ```typescript
 /// try {
+///  const tree = new TaffyTree();
+///  const node = tree.newLeaf(new Style());
 ///  tree.remove(node);
 /// } catch (e) {
 ///   if (e instanceof TaffyError) {
@@ -112,6 +116,8 @@ pub(crate) fn to_js_error(e: TaffyError) -> JsValue {
 ///
 /// @example
 /// ```typescript
+/// const tree = new TaffyTree();
+/// const style = new Style();
 /// const nodeId = tree.newLeaf(style);  // Returns bigint or throws TaffyError
 /// ```
 pub(crate) fn map_node_result(result: Result<NodeId, TaffyError>) -> Result<u64, JsValue> {
@@ -132,6 +138,9 @@ pub(crate) fn map_node_result(result: Result<NodeId, TaffyError>) -> Result<u64,
 ///
 /// @example
 /// ```typescript
+/// const tree = new TaffyTree();
+/// const nodeId = tree.newLeaf(new Style());
+/// const style = new Style();
 /// tree.setStyle(nodeId, style);  // Returns void or throws TaffyError
 /// ```
 pub(crate) fn map_void_result(result: Result<(), TaffyError>) -> Result<(), JsValue> {

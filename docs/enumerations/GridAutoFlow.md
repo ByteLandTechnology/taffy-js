@@ -14,8 +14,9 @@ the sparse or dense packing algorithm is used.
 ## Example
 
 ```typescript
-import { GridAutoFlow } from "taffy-js";
+import { Style, GridAutoFlow } from "taffy-js";
 
+const style = new Style();
 style.gridAutoFlow = GridAutoFlow.Row; // Fill rows first
 style.gridAutoFlow = GridAutoFlow.Column; // Fill columns first
 style.gridAutoFlow = GridAutoFlow.RowDense; // Fill rows, pack densely

@@ -32,30 +32,37 @@
 
 ## Interfaces
 
-| Interface                                                      | Description                                         |
-| -------------------------------------------------------------- | --------------------------------------------------- |
-| [DetailedGridInfo](interfaces/DetailedGridInfo.md)             | Detailed information about a grid layout.           |
-| [DetailedGridItemsInfo](interfaces/DetailedGridItemsInfo.md)   | Information about a grid item's placement.          |
-| [DetailedGridTracksInfo](interfaces/DetailedGridTracksInfo.md) | Information about grid tracks (rows or columns).    |
-| [InitOutput](interfaces/InitOutput.md)                         | -                                                   |
-| [Line](interfaces/Line.md)                                     | Line type representing start and end positions.     |
-| [Point](interfaces/Point.md)                                   | Point with x and y coordinates/values.              |
-| [Rect](interfaces/Rect.md)                                     | Rectangle with left, right, top, and bottom values. |
-| [Size](interfaces/Size.md)                                     | Generic size type with width and height.            |
+| Interface                              | Description |
+| -------------------------------------- | ----------- |
+| [InitOutput](interfaces/InitOutput.md) | -           |
 
 ## Type Aliases
 
-| Type Alias                                                   | Description                                                                |
-| ------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| [AvailableSpace](type-aliases/AvailableSpace.md)             | Available space constraint for layout computation.                         |
-| [DetailedLayoutInfo](type-aliases/DetailedLayoutInfo.md)     | Detailed layout information (for grid layouts).                            |
-| [Dimension](type-aliases/Dimension.md)                       | Dimension type supporting length, percentage, or auto values.              |
-| [GridPlacement](type-aliases/GridPlacement.md)               | Grid placement type for positioning grid items.                            |
-| [InitInput](type-aliases/InitInput.md)                       | -                                                                          |
-| [LengthPercentage](type-aliases/LengthPercentage.md)         | Length or percentage value (no auto support).                              |
-| [LengthPercentageAuto](type-aliases/LengthPercentageAuto.md) | Length, percentage, or auto value.                                         |
-| [MeasureFunction](type-aliases/MeasureFunction.md)           | Custom measure function for leaf nodes with text or other dynamic content. |
-| [SyncInitInput](type-aliases/SyncInitInput.md)               | -                                                                          |
+| Type Alias                                                       | Description                                                                |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| [AvailableSpace](type-aliases/AvailableSpace.md)                 | Available space constraint for layout computation.                         |
+| [DetailedGridInfo](type-aliases/DetailedGridInfo.md)             | Detailed information about a grid layout.                                  |
+| [DetailedGridItemsInfo](type-aliases/DetailedGridItemsInfo.md)   | Information about a grid item's placement.                                 |
+| [DetailedGridTracksInfo](type-aliases/DetailedGridTracksInfo.md) | Information about grid tracks (rows or columns).                           |
+| [DetailedLayoutInfo](type-aliases/DetailedLayoutInfo.md)         | Detailed layout information (for grid layouts).                            |
+| [Dimension](type-aliases/Dimension.md)                           | Dimension type supporting length, percentage, or auto values.              |
+| [GridPlacement](type-aliases/GridPlacement.md)                   | Grid placement type for positioning grid items.                            |
+| [GridTemplateArea](type-aliases/GridTemplateArea.md)             | Named grid area definition.                                                |
+| [GridTemplateComponent](type-aliases/GridTemplateComponent.md)   | Grid track sizing definition.                                              |
+| [GridTemplateRepetition](type-aliases/GridTemplateRepetition.md) | Grid track repetition definition.                                          |
+| [InitInput](type-aliases/InitInput.md)                           | -                                                                          |
+| [LengthPercentage](type-aliases/LengthPercentage.md)             | Length or percentage value (no auto support).                              |
+| [LengthPercentageAuto](type-aliases/LengthPercentageAuto.md)     | Length, percentage, or auto value.                                         |
+| [Line](type-aliases/Line.md)                                     | Line type representing start and end positions.                            |
+| [MaxTrackSizingFunction](type-aliases/MaxTrackSizingFunction.md) | Maximum track sizing function.                                             |
+| [MeasureFunction](type-aliases/MeasureFunction.md)               | Custom measure function for leaf nodes with text or other dynamic content. |
+| [MinTrackSizingFunction](type-aliases/MinTrackSizingFunction.md) | Minumum track sizing function.                                             |
+| [Point](type-aliases/Point.md)                                   | Point with x and y coordinates/values.                                     |
+| [Rect](type-aliases/Rect.md)                                     | Rectangle with left, right, top, and bottom values.                        |
+| [RepetitionCount](type-aliases/RepetitionCount.md)               | Grid track repetition parameter.                                           |
+| [Size](type-aliases/Size.md)                                     | Generic size type with width and height.                                   |
+| [SyncInitInput](type-aliases/SyncInitInput.md)                   | -                                                                          |
+| [TrackSizingFunction](type-aliases/TrackSizingFunction.md)       | Track sizing function (min/max pair).                                      |
 
 ## Functions
 

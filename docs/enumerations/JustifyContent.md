@@ -14,8 +14,9 @@ This corresponds to the CSS `justify-content` property.
 ## Example
 
 ```typescript
-import { JustifyContent } from "taffy-js";
+import { Style, JustifyContent } from "taffy-js";
 
+const style = new Style();
 style.justifyContent = JustifyContent.Center; // Center items
 style.justifyContent = JustifyContent.SpaceBetween; // Distribute evenly
 ```

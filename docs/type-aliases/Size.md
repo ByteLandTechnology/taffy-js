@@ -4,7 +4,14 @@
 
 [Taffy-JS API Documentation](../index.md) / Size
 
-# Interface: Size\<T\>
+# Type Alias: Size\<T\>
+
+```ts
+type Size<T> = {
+  height: T;
+  width: T;
+};
+```
 
 Generic size type with width and height.
 
@@ -26,7 +33,7 @@ const dimensionSize: Size<Dimension> = {
 
 const availableSize: Size<AvailableSpace> = {
   width: 800,
-  height: "maxContent",
+  height: "max-content",
 };
 ```
 

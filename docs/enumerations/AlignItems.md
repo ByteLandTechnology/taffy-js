@@ -14,8 +14,9 @@ This corresponds to the CSS `align-items` property.
 ## Example
 
 ```typescript
-import { AlignItems } from "taffy-js";
+import { Style, AlignItems } from "taffy-js";
 
+const style = new Style();
 style.alignItems = AlignItems.Center; // Center items on cross axis
 style.alignItems = AlignItems.Stretch; // Stretch items to fill container
 ```

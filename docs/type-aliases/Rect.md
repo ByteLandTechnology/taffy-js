@@ -4,7 +4,16 @@
 
 [Taffy-JS API Documentation](../index.md) / Rect
 
-# Interface: Rect\<T\>
+# Type Alias: Rect\<T\>
+
+```ts
+type Rect<T> = {
+  bottom: T;
+  left: T;
+  right: T;
+  top: T;
+};
+```
 
 Rectangle with left, right, top, and bottom values.
 

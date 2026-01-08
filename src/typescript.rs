@@ -34,8 +34,8 @@ const TS_APPEND_CONTENT: &'static str = r#"
  *
  * @remarks
  * - Use `number` when you have a fixed container size
- * - Use `"minContent"` to shrink-wrap to the minimum content size
- * - Use `"maxContent"` to expand to fit all content without wrapping
+ * - Use `"min-content"` to shrink-wrap to the minimum content size
+ * - Use `"max-content"` to expand to fit all content without wrapping
  *
  * @example
  * ```typescript
@@ -54,13 +54,13 @@ const TS_APPEND_CONTENT: &'static str = r#"
  *
  * // Flexible width, fixed height
  * const flexibleSpace: Size<AvailableSpace> = {
- *   width: "maxContent",
+ *   width: "max-content",
  *   height: 400
  * };
  * tree.computeLayout(root, flexibleSpace);
  * ```
  */
-export type AvailableSpace = number | "minContent" | "maxContent";
+export type AvailableSpace = number | "min-content" | "max-content";
 
 /**
  * Generic size type with width and height.
@@ -87,16 +87,16 @@ export type AvailableSpace = number | "minContent" | "maxContent";
  *
  * const availableSize: Size<AvailableSpace> = {
  *   width: 800,
- *   height: "maxContent"
+ *   height: "max-content"
  * };
  * ```
  */
-export interface Size<T> {
+export type Size<T> = {
   /** The horizontal dimension value */
   width: T;
   /** The vertical dimension value */
   height: T;
-}
+};
 
 /**
  * Custom measure function for leaf nodes with text or other dynamic content.
@@ -107,7 +107,7 @@ export interface Size<T> {
  * @param knownDimensions - Dimensions already determined by constraints. Each dimension
  *                          is `number` if known, or `undefined` if needs to be measured.
  * @param availableSpace - The available space constraints for the node. Can be definite
- *                         pixels, "minContent", or "maxContent".
+ *                         pixels, "min-content", or "max-content".
  * @param node - The node ID (`bigint`) of the node being measured
  * @param context - User-provided context attached to the node via `newLeafWithContext()`
  * @param style - The node's current Style configuration
@@ -130,6 +130,9 @@ export interface Size<T> {
  * const context: TextContext = { text: "Hello, World!", fontSize: 16 };
  * const textNode: bigint = tree.newLeafWithContext(style, context);
  *
+ * // Helper function to measure text width
+ * const measureTextWidth = (text: string, fontSize: number) => text.length * fontSize * 0.6;
+ *
  * // Typed measure function
  * const measureText: MeasureFunction = (
  *   knownDimensions,
@@ -149,7 +152,7 @@ export interface Size<T> {
  *
  * tree.computeLayoutWithMeasure(
  *   textNode,
- *   { width: 200, height: "maxContent" },
+ *   { width: 200, height: "max-content" },
  *   measureText
  * );
  * ```
@@ -286,12 +289,12 @@ export type LengthPercentageAuto = number | `${number}%` | "auto";
  * style.overflow = overflow;
  * ```
  */
-export interface Point<T> {
+export type Point<T> = {
   /** The horizontal (x-axis) value */
   x: T;
   /** The vertical (y-axis) value */
   y: T;
-}
+};
 
 /**
  * Rectangle with left, right, top, and bottom values.
@@ -331,7 +334,7 @@ export interface Point<T> {
  * style.margin = margin;
  * ```
  */
-export interface Rect<T> {
+export type Rect<T> = {
   /** The left side value */
   left: T;
   /** The right side value */
@@ -340,7 +343,7 @@ export interface Rect<T> {
   top: T;
   /** The bottom side value */
   bottom: T;
-}
+};
 
 /**
  * Detailed layout information (for grid layouts).
@@ -353,18 +356,24 @@ export interface Rect<T> {
  *
  * @example
  * ```typescript
- * import type { DetailedLayoutInfo, DetailedGridInfo } from 'taffy-js';
+ * import { TaffyTree, Style, Display, type DetailedLayoutInfo, type DetailedGridInfo } from 'taffy-js';
+ *
+ * const tree = new TaffyTree();
+ * const style = new Style();
+ * style.display = Display.Grid;
+ * const gridNode = tree.newLeaf(style);
+ * tree.computeLayout(gridNode, { width: 100, height: 100 });
  *
  * const info: DetailedLayoutInfo = tree.detailedLayoutInfo(gridNode);
  *
- * if (info !== "None" && typeof info === 'object' && 'Grid' in info) {
- *   const grid: DetailedGridInfo = info.Grid;
+ * if (info && typeof info === 'object' && 'Grid' in info) {
+ *   const grid = info.Grid as DetailedGridInfo;
  *   console.log('Rows:', grid.rows.sizes);
  *   console.log('Columns:', grid.columns.sizes);
  * }
  * ```
  */
-export type DetailedLayoutInfo = DetailedGridInfo | null;
+export type DetailedLayoutInfo = DetailedGridInfo | undefined;
 
 /**
  * Detailed information about a grid layout.
@@ -375,38 +384,38 @@ export type DetailedLayoutInfo = DetailedGridInfo | null;
  * @property columns - Information about column tracks
  * @property items - Array of item placement information
  */
-export interface DetailedGridInfo {
+export type DetailedGridInfo = {
   /** Information about the grid's row tracks */
   rows: DetailedGridTracksInfo;
   /** Information about the grid's column tracks */
   columns: DetailedGridTracksInfo;
   /** Placement information for each grid item */
   items: DetailedGridItemsInfo[];
-}
+};
 
 /**
  * Information about grid tracks (rows or columns).
  *
  * Provides detailed sizing and gutter information for a set of grid tracks.
  *
- * @property negative_implicit_tracks - Number of implicit tracks before explicit tracks
- * @property explicit_tracks - Number of explicitly defined tracks
- * @property positive_implicit_tracks - Number of implicit tracks after explicit tracks
+ * @property negativeImplicitTracks - Number of implicit tracks before explicit tracks
+ * @property explicitTracks - Number of explicitly defined tracks
+ * @property positiveImplicitTracks - Number of implicit tracks after explicit tracks
  * @property gutters - Array of gutter sizes between tracks (in pixels)
  * @property sizes - Array of track sizes (in pixels)
  */
-export interface DetailedGridTracksInfo {
+export type DetailedGridTracksInfo = {
   /** Number of implicit tracks before explicit tracks (for negative line numbers) */
-  negative_implicit_tracks: number;
+  negativeImplicitTracks: number;
   /** Number of tracks explicitly defined in grid-template-rows/columns */
-  explicit_tracks: number;
+  explicitTracks: number;
   /** Number of implicit tracks created after explicit tracks */
-  positive_implicit_tracks: number;
+  positiveImplicitTracks: number;
   /** Gap sizes between tracks in pixels */
   gutters: number[];
   /** Computed sizes of each track in pixels */
   sizes: number[];
-}
+};
 
 /**
  * Information about a grid item's placement.
@@ -414,21 +423,21 @@ export interface DetailedGridTracksInfo {
  * Specifies which grid lines the item spans on both axes.
  * Line numbers are 1-indexed, with 1 being the first line.
  *
- * @property row_start - Starting row line number (1-indexed)
- * @property row_end - Ending row line number (exclusive)
- * @property column_start - Starting column line number (1-indexed)
- * @property column_end - Ending column line number (exclusive)
+ * @property rowStart - Starting row line number (1-indexed)
+ * @property rowEnd - Ending row line number (exclusive)
+ * @property columnStart - Starting column line number (1-indexed)
+ * @property columnEnd - Ending column line number (exclusive)
  */
-export interface DetailedGridItemsInfo {
+export type DetailedGridItemsInfo = {
   /** Starting row line (1-indexed) */
-  row_start: number;
+  rowStart: number;
   /** Ending row line (exclusive) */
-  row_end: number;
+  rowEnd: number;
   /** Starting column line (1-indexed) */
-  column_start: number;
+  columnStart: number;
   /** Ending column line (exclusive) */
-  column_end: number;
-}
+  columnEnd: number;
+};
 
 /**
  * Grid placement type for positioning grid items.
@@ -453,9 +462,15 @@ export interface DetailedGridItemsInfo {
  *
  * // Span (CSS: grid-row-start: span 3)
  * const span: GridPlacement = { span: 3 };
+ *
+ * // Named line (CSS: grid-row-start: header 2)
+ * const named: GridPlacement = { line: 2, ident: "header" };
+ *
+ * // Named span (CSS: grid-row-start: span 2 header)
+ * const namedSpan: GridPlacement = { span: 2, ident: "header" };
  * ```
  */
-export type GridPlacement = "auto" | number | { span: number };
+export type GridPlacement = "auto" | number | {line: number; ident: string} | {span: number; ident?: string};
 
 /**
  * Line type representing start and end positions.
@@ -485,10 +500,76 @@ export type GridPlacement = "auto" | number | { span: number };
  * style.gridRow = { start: "auto", end: "auto" };
  * ```
  */
-export interface Line<T> {
+export type Line<T> = {
   /** The starting position (CSS: *-start) */
   start: T;
   /** The ending position (CSS: *-end) */
   end: T;
 }
+/**
+ * Grid track repetition parameter.
+ *
+ * Defines how many times a track pattern should repeat.
+ *
+ * @remarks
+ * - `number`: Exact number of repetitions (e.g. `repeat(3, ...)`).
+ * - `"autoFill"`: Fills the container with as many tracks as possible.
+ * - `"autoFit"`: Fills the container, collapsing empty tracks.
+ */
+export type RepetitionCount = number | "auto-fill" | "auto-fit";
+
+/**
+ * Minumum track sizing function.
+ *
+ * Defines the minimum size of a grid track.
+ */
+export type MinTrackSizingFunction = number | `${number}%` | "auto" | "min-content" | "max-content";
+
+/**
+ * Maximum track sizing function.
+ *
+ * Defines the maximum size of a grid track.
+ */
+export type MaxTrackSizingFunction = number | `${number}%` | `${number}fr` | "auto" | "min-content" | "max-content" | "fit-content";
+
+/**
+ * Track sizing function (min/max pair).
+ *
+ * Defines the size range for a single grid track.
+ */
+export type TrackSizingFunction = {min: MinTrackSizingFunction; max: MaxTrackSizingFunction};
+
+/**
+ * Grid track repetition definition.
+ */
+export type GridTemplateRepetition = {
+  count: RepetitionCount;
+  tracks: TrackSizingFunction[];
+  lineNames?: string[][];
+};
+
+/**
+ * Grid track sizing definition.
+ *
+ * Can be a single track sizing function or a repetition of tracks.
+ */
+export type GridTemplateComponent = TrackSizingFunction | GridTemplateRepetition;
+
+/**
+ * Named grid area definition.
+ * 
+ * Defines a named area within the grid and its boundaries.
+ */
+export type GridTemplateArea = {
+  /** The name of the grid area */
+  name: string;
+  /** Start row line */
+  rowStart: number;
+  /** End row line */
+  rowEnd: number;
+  /** Start column line */
+  columnStart: number;
+  /** End column line */
+  columnEnd: number;
+};
 "#;

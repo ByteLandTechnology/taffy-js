@@ -462,29 +462,52 @@ describe("Style Class Properties", () => {
       }
     });
 
-    it("gridTemplateRows: defaults to empty, can be read", () => {
+    it("gridTemplateRows: defaults to empty, sets and gets correctly", () => {
       const style = new Style();
-      // Default is empty array
       expect(Array.isArray(style.gridTemplateRows)).toBe(true);
       expect(style.gridTemplateRows.length).toBe(0);
+
+      // Set simple tracks
+      // Set simple tracks with new DTO format
+      // { min: 10, max: "auto" }
+      const track1 = { min: 10, max: "auto" };
+      style.gridTemplateRows = [track1] as any;
+
+      expect(style.gridTemplateRows.length).toBe(1);
+      const readback = style.gridTemplateRows[0] as any;
+      expect(readback.min).toBe(10);
     });
 
-    it("gridTemplateColumns: defaults to empty, can be read", () => {
+    it("gridTemplateColumns: defaults to empty, sets and gets correctly", () => {
       const style = new Style();
       expect(Array.isArray(style.gridTemplateColumns)).toBe(true);
       expect(style.gridTemplateColumns.length).toBe(0);
+
+      style.gridTemplateColumns = [
+        { min: "min-content", max: "max-content" },
+      ] as any;
+      expect(style.gridTemplateColumns.length).toBe(1);
     });
 
-    it("gridAutoRows: defaults to empty, can be read", () => {
+    it("gridAutoRows: defaults to empty, sets and gets correctly", () => {
       const style = new Style();
       expect(Array.isArray(style.gridAutoRows)).toBe(true);
       expect(style.gridAutoRows.length).toBe(0);
+
+      // gridAutoRows expects NonRepeatedTrackSizingFunctionDto[] (inner part of Single)
+      style.gridAutoRows = [{ min: 20, max: "auto" }] as any;
+      expect(style.gridAutoRows.length).toBe(1);
+      const readback = style.gridAutoRows[0] as any;
+      expect(readback.min).toBe(20);
     });
 
-    it("gridAutoColumns: defaults to empty, can be read", () => {
+    it("gridAutoColumns: defaults to empty, sets and gets correctly", () => {
       const style = new Style();
       expect(Array.isArray(style.gridAutoColumns)).toBe(true);
       expect(style.gridAutoColumns.length).toBe(0);
+
+      style.gridAutoColumns = [{ min: "auto", max: "1fr" }];
+      expect(style.gridAutoColumns.length).toBe(1);
     });
 
     it("gridTemplateAreas: defaults to empty, sets and gets correctly", () => {
@@ -494,17 +517,17 @@ describe("Style Class Properties", () => {
       style.gridTemplateAreas = [
         {
           name: "header",
-          row_start: 1,
-          row_end: 2,
-          column_start: 1,
-          column_end: 4,
+          rowStart: 1,
+          rowEnd: 2,
+          columnStart: 1,
+          columnEnd: 4,
         },
         {
           name: "main",
-          row_start: 2,
-          row_end: 4,
-          column_start: 2,
-          column_end: 4,
+          rowStart: 2,
+          rowEnd: 4,
+          columnStart: 2,
+          columnEnd: 4,
         },
       ];
       expect(style.gridTemplateAreas.length).toBe(2);
@@ -636,38 +659,38 @@ describe("Style Class Properties", () => {
       style.gridTemplateAreas = [
         {
           name: "header",
-          row_start: 1,
-          row_end: 2,
-          column_start: 1,
-          column_end: 4,
+          rowStart: 1,
+          rowEnd: 2,
+          columnStart: 1,
+          columnEnd: 4,
         },
         {
           name: "nav",
-          row_start: 2,
-          row_end: 3,
-          column_start: 1,
-          column_end: 2,
+          rowStart: 2,
+          rowEnd: 3,
+          columnStart: 1,
+          columnEnd: 2,
         },
         {
           name: "main",
-          row_start: 2,
-          row_end: 3,
-          column_start: 2,
-          column_end: 3,
+          rowStart: 2,
+          rowEnd: 3,
+          columnStart: 2,
+          columnEnd: 3,
         },
         {
           name: "aside",
-          row_start: 2,
-          row_end: 3,
-          column_start: 3,
-          column_end: 4,
+          rowStart: 2,
+          rowEnd: 3,
+          columnStart: 3,
+          columnEnd: 4,
         },
         {
           name: "footer",
-          row_start: 3,
-          row_end: 4,
-          column_start: 1,
-          column_end: 4,
+          rowStart: 3,
+          rowEnd: 4,
+          columnStart: 1,
+          columnEnd: 4,
         },
       ];
 
@@ -680,10 +703,10 @@ describe("Style Class Properties", () => {
 
       // Verify area bounds
       const header = style.gridTemplateAreas[0];
-      expect(header.row_start).toBe(1);
-      expect(header.row_end).toBe(2);
-      expect(header.column_start).toBe(1);
-      expect(header.column_end).toBe(4);
+      expect(header.rowStart).toBe(1);
+      expect(header.rowEnd).toBe(2);
+      expect(header.columnStart).toBe(1);
+      expect(header.columnEnd).toBe(4);
     });
 
     it("gridTemplateRowNames: handles empty line names", () => {
@@ -861,10 +884,10 @@ describe("Style Class Properties", () => {
       style.gridTemplateAreas = [
         {
           name: "content",
-          row_start: 1,
-          row_end: 2,
-          column_start: 1,
-          column_end: 2,
+          rowStart: 1,
+          rowEnd: 2,
+          columnStart: 1,
+          columnEnd: 2,
         },
       ];
       expect(style.gridTemplateAreas.length).toBe(1);

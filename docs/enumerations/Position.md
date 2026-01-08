@@ -14,8 +14,9 @@ This corresponds to the CSS `position` property.
 ## Example
 
 ```typescript
-import { Position } from "taffy-js";
+import { Style, Position } from "taffy-js";
 
+const style = new Style();
 style.position = Position.Relative; // Normal document flow
 style.position = Position.Absolute; // Removed from flow, uses inset values
 ```

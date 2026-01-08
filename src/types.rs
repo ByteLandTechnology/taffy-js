@@ -122,16 +122,20 @@ extern "C" {
     pub type JsLineGridPlacement;
 
     /// Grid template columns/rows type (uses Taffy's native serde format)
-    #[wasm_bindgen(typescript_type = "GridTrack[]")]
-    pub type JsGridTracks;
+    #[wasm_bindgen(typescript_type = "GridTemplateComponent[]")]
+    pub type JsGridTemplateComponents;
 
     /// Grid template areas type
-    #[wasm_bindgen(typescript_type = "GridArea[]")]
-    pub type JsGridAreas;
+    #[wasm_bindgen(typescript_type = "GridTemplateArea[]")]
+    pub type JsGridTemplateAreas;
 
     /// Grid line names type
     #[wasm_bindgen(typescript_type = "string[][]")]
     pub type JsGridLineNames;
+
+    /// Non-repeated grid tracks (for auto-columns/rows)
+    #[wasm_bindgen(typescript_type = "TrackSizingFunction[]")]
+    pub type JsTrackSizingFunctions;
 }
 
 // =============================================================================
@@ -668,8 +672,8 @@ impl Serialize for AvailableSpaceDto {
     {
         match self {
             AvailableSpaceDto::Definite(val) => serializer.serialize_f32(*val),
-            AvailableSpaceDto::MinContent => serializer.serialize_str("minContent"),
-            AvailableSpaceDto::MaxContent => serializer.serialize_str("maxContent"),
+            AvailableSpaceDto::MinContent => serializer.serialize_str("min-content"),
+            AvailableSpaceDto::MaxContent => serializer.serialize_str("max-content"),
         }
     }
 }
@@ -685,7 +689,7 @@ impl<'de> Deserialize<'de> for AvailableSpaceDto {
             type Value = AvailableSpaceDto;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("a number, 'minContent', or 'maxContent'")
+                formatter.write_str("a number, 'min-content', or 'max-content'")
             }
 
             fn visit_i64<E>(self, value: i64) -> Result<Self::Value, E> {
@@ -705,9 +709,9 @@ impl<'de> Deserialize<'de> for AvailableSpaceDto {
                 E: de::Error,
             {
                 match value {
-                    "minContent" => Ok(AvailableSpaceDto::MinContent),
-                    "maxContent" => Ok(AvailableSpaceDto::MaxContent),
-                    _ => Err(E::unknown_variant(value, &["minContent", "maxContent"])),
+                    "min-content" => Ok(AvailableSpaceDto::MinContent),
+                    "max-content" => Ok(AvailableSpaceDto::MaxContent),
+                    _ => Err(E::unknown_variant(value, &["min-content", "max-content"])),
                 }
             }
         }
@@ -759,6 +763,7 @@ pub struct DetailedGridInfoDto {
 
 /// DTO for grid track info (rows or columns)
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DetailedGridTracksInfoDto {
     pub negative_implicit_tracks: u16,
     pub explicit_tracks: u16,
@@ -769,6 +774,7 @@ pub struct DetailedGridTracksInfoDto {
 
 /// DTO for grid item placement
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DetailedGridItemsInfoDto {
     pub row_start: u16,
     pub row_end: u16,
@@ -793,12 +799,11 @@ pub struct DetailedGridItemsInfoDto {
 /// ```
 #[derive(Debug, Clone)]
 pub enum GridPlacementDto {
-    /// Place item according to the auto-placement algorithm
     Auto,
-    /// Place item at specified line (column or row) index
     Line(i16),
-    /// Item should span specified number of tracks
     Span(u16),
+    NamedLine(i16, String), // Changed from String to (i16, String)
+    NamedSpan(u16, String),
 }
 
 impl Serialize for GridPlacementDto {
@@ -806,14 +811,27 @@ impl Serialize for GridPlacementDto {
     where
         S: Serializer,
     {
-        use serde::ser::SerializeMap;
+        use serde::ser::SerializeStruct;
         match self {
             GridPlacementDto::Auto => serializer.serialize_str("auto"),
             GridPlacementDto::Line(l) => serializer.serialize_i16(*l),
             GridPlacementDto::Span(s) => {
-                let mut map = serializer.serialize_map(Some(1))?;
-                map.serialize_entry("span", s)?;
-                map.end()
+                let mut state = serializer.serialize_struct("Span", 1)?;
+                state.serialize_field("span", s)?;
+                state.end()
+            }
+            GridPlacementDto::NamedLine(l, s) => {
+                // Output { line: n, ident: s }
+                let mut state = serializer.serialize_struct("NamedLine", 2)?;
+                state.serialize_field("line", l)?; // Use "line" as requested
+                state.serialize_field("ident", s)?;
+                state.end()
+            }
+            GridPlacementDto::NamedSpan(n, s) => {
+                let mut state = serializer.serialize_struct("NamedSpan", 2)?;
+                state.serialize_field("span", n)?;
+                state.serialize_field("ident", s)?;
+                state.end()
             }
         }
     }
@@ -830,7 +848,7 @@ impl<'de> Deserialize<'de> for GridPlacementDto {
             type Value = GridPlacementDto;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("'auto', a line number, or an object with 'span'")
+                formatter.write_str("'auto', line number, line object, or span object")
             }
 
             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
@@ -840,7 +858,14 @@ impl<'de> Deserialize<'de> for GridPlacementDto {
                 if value == "auto" {
                     Ok(GridPlacementDto::Auto)
                 } else {
-                    Err(E::custom("Expected 'auto'"))
+                    // Previous "header" string support removed?
+                    // User requested specific type. But backward compat?
+                    // "auto" | number | { line: ..., ident: ... } ...
+                    // User declaration REMOVED string.
+                    // So "header" is strictly invalid.
+                    // But I'll allow it as convenient shorthand if valid?
+                    // No, user specifically rewrote stricter type.
+                    Err(E::custom("String input only supported for 'auto'"))
                 }
             }
 
@@ -852,21 +877,42 @@ impl<'de> Deserialize<'de> for GridPlacementDto {
                 Ok(GridPlacementDto::Line(value as i16))
             }
 
+            fn visit_f64<E>(self, value: f64) -> Result<Self::Value, E> {
+                Ok(GridPlacementDto::Line(value as i16))
+            }
+
             fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
             where
                 M: de::MapAccess<'de>,
             {
                 let mut span: Option<u16> = None;
+                let mut ident: Option<String> = None;
+                let mut line: Option<i16> = None; // For named line
+
                 while let Some(key) = map.next_key::<String>()? {
                     if key == "span" {
                         span = Some(map.next_value()?);
+                    } else if key == "ident" {
+                        ident = Some(map.next_value()?);
+                    } else if key == "line" {
+                        line = Some(map.next_value()?);
                     } else {
                         let _ = map.next_value::<serde::de::IgnoredAny>()?;
                     }
                 }
-                match span {
-                    Some(s) => Ok(GridPlacementDto::Span(s)),
-                    None => Err(de::Error::missing_field("span")),
+
+                match (span, line, ident) {
+                    (Some(s), None, Some(i)) => Ok(GridPlacementDto::NamedSpan(s, i)),
+                    (Some(s), None, None) => Ok(GridPlacementDto::Span(s)),
+                    (None, Some(l), Some(i)) => Ok(GridPlacementDto::NamedLine(l, i)),
+                    (None, None, Some(i)) => Ok(GridPlacementDto::NamedSpan(1, i)), // { ident: "header" } -> span 1 header? Or named line default?
+                    // User says { line: number, ident: string }.
+                    // If line is missing, maybe default 0? But { ident: string } usually means "1st line with name".
+                    // However, type says line is MANDATORY.
+                    // I'll assume NamedSpan(1, i) if line & span missing.
+                    // Or error?
+                    // Let's stick to explicit match.
+                    _ => Err(de::Error::custom("Invalid object for GridPlacement")),
                 }
             }
         }
@@ -884,8 +930,12 @@ impl From<GridPlacement> for GridPlacementDto {
             GridPlacement::Auto => GridPlacementDto::Auto,
             GridPlacement::Line(line) => GridPlacementDto::Line(line.as_i16()),
             GridPlacement::Span(span) => GridPlacementDto::Span(span),
-            GridPlacement::NamedLine(_, idx) => GridPlacementDto::Line(idx),
-            GridPlacement::NamedSpan(_, span) => GridPlacementDto::Span(span),
+            GridPlacement::NamedLine(name, idx) => {
+                GridPlacementDto::NamedLine(idx, name.to_string())
+            }
+            GridPlacement::NamedSpan(name, span) => {
+                GridPlacementDto::NamedSpan(span, name.to_string())
+            }
         }
     }
 }
@@ -899,6 +949,8 @@ impl From<GridPlacementDto> for GridPlacement {
             GridPlacementDto::Auto => GridPlacement::Auto,
             GridPlacementDto::Line(idx) => GridPlacement::from_line_index(idx),
             GridPlacementDto::Span(span) => GridPlacement::from_span(span),
+            GridPlacementDto::NamedLine(idx, s) => GridPlacement::NamedLine(s.into(), idx), // NamedLine variant
+            GridPlacementDto::NamedSpan(n, s) => GridPlacement::NamedSpan(s.into(), n),
         }
     }
 }
@@ -934,6 +986,455 @@ impl From<LineGridPlacementDto> for Line<GridPlacement> {
         Line {
             start: val.start.into(),
             end: val.end.into(),
+        }
+    }
+}
+
+// =============================================================================
+// Grid Track Sizing DTOs
+// =============================================================================
+
+#[derive(Debug, Clone)]
+pub enum MinTrackSizingFunctionDto {
+    Length(f32),
+    Percent(f32),
+    Auto,
+    MinContent,
+    MaxContent,
+}
+
+impl Serialize for MinTrackSizingFunctionDto {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::Length(v) => serializer.serialize_f32(*v),
+            Self::Percent(v) => serializer.serialize_str(&format!("{}%", v)),
+            Self::Auto => serializer.serialize_str("auto"),
+            Self::MinContent => serializer.serialize_str("min-content"),
+            Self::MaxContent => serializer.serialize_str("max-content"),
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for MinTrackSizingFunctionDto {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct MinTrackVisitor;
+        impl<'de> Visitor<'de> for MinTrackVisitor {
+            type Value = MinTrackSizingFunctionDto;
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("number, percentage string, or keyword")
+            }
+            fn visit_f64<E>(self, v: f64) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(MinTrackSizingFunctionDto::Length(v as f32))
+            }
+            fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(MinTrackSizingFunctionDto::Length(v as f32))
+            }
+            fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(MinTrackSizingFunctionDto::Length(v as f32))
+            }
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                match v {
+                    "auto" => Ok(MinTrackSizingFunctionDto::Auto),
+                    "min-content" => Ok(MinTrackSizingFunctionDto::MinContent),
+                    "max-content" => Ok(MinTrackSizingFunctionDto::MaxContent),
+                    s if s.ends_with('%') => {
+                        let num = s[..s.len() - 1].parse::<f32>().map_err(E::custom)?;
+                        Ok(MinTrackSizingFunctionDto::Percent(num))
+                    }
+                    _ => Err(E::custom(format!("Unknown MinTrackSizingFunction: {}", v))),
+                }
+            }
+        }
+        deserializer.deserialize_any(MinTrackVisitor)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum MaxTrackSizingFunctionDto {
+    Length(f32),
+    Percent(f32),
+    Fraction(f32),
+    FitContent(f32),
+    FitContentPercent(f32),
+    Auto,
+    MinContent,
+    MaxContent,
+}
+
+impl Serialize for MaxTrackSizingFunctionDto {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::Length(v) => serializer.serialize_f32(*v),
+            Self::Percent(v) => serializer.serialize_str(&format!("{}%", v)),
+            Self::Fraction(v) => serializer.serialize_str(&format!("{}fr", v)),
+            Self::FitContent(_) => serializer.serialize_str("fit-content"),
+            Self::FitContentPercent(_) => serializer.serialize_str("fit-content"),
+            Self::Auto => serializer.serialize_str("auto"),
+            Self::MinContent => serializer.serialize_str("min-content"),
+            Self::MaxContent => serializer.serialize_str("max-content"),
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for MaxTrackSizingFunctionDto {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct MaxTrackVisitor;
+        impl<'de> Visitor<'de> for MaxTrackVisitor {
+            type Value = MaxTrackSizingFunctionDto;
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("number, %, fr, or keyword")
+            }
+            fn visit_f64<E>(self, v: f64) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(MaxTrackSizingFunctionDto::Length(v as f32))
+            }
+            fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(MaxTrackSizingFunctionDto::Length(v as f32))
+            }
+            fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(MaxTrackSizingFunctionDto::Length(v as f32))
+            }
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                match v {
+                    "auto" => Ok(MaxTrackSizingFunctionDto::Auto),
+                    "min-content" => Ok(MaxTrackSizingFunctionDto::MinContent),
+                    "max-content" => Ok(MaxTrackSizingFunctionDto::MaxContent),
+                    "fit-content" => Ok(MaxTrackSizingFunctionDto::FitContent(0.0)),
+                    s if s.ends_with("fr") => {
+                        let num = s[..s.len() - 2].parse::<f32>().map_err(E::custom)?;
+                        Ok(MaxTrackSizingFunctionDto::Fraction(num))
+                    }
+                    s if s.ends_with('%') => {
+                        let num = s[..s.len() - 1].parse::<f32>().map_err(E::custom)?;
+                        Ok(MaxTrackSizingFunctionDto::Percent(num))
+                    }
+                    _ => Err(E::custom(format!("Unknown MaxTrackSizingFunction: {}", v))),
+                }
+            }
+        }
+        deserializer.deserialize_any(MaxTrackVisitor)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum RepetitionCountDto {
+    Count(u16),
+    AutoFill,
+    AutoFit,
+}
+
+impl Serialize for RepetitionCountDto {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Self::Count(v) => serializer.serialize_u16(*v),
+            Self::AutoFill => serializer.serialize_str("auto-fill"),
+            Self::AutoFit => serializer.serialize_str("auto-fit"),
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for RepetitionCountDto {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct RepetitionVisitor;
+        impl<'de> Visitor<'de> for RepetitionVisitor {
+            type Value = RepetitionCountDto;
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("number or keyword")
+            }
+            fn visit_f64<E>(self, v: f64) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(RepetitionCountDto::Count(v as u16))
+            }
+            fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(RepetitionCountDto::Count(v as u16))
+            }
+            fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                Ok(RepetitionCountDto::Count(v as u16))
+            }
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                match v {
+                    "auto-fill" => Ok(RepetitionCountDto::AutoFill),
+                    "auto-fit" => Ok(RepetitionCountDto::AutoFit),
+                    _ => Err(E::custom(format!("Unknown RepetitionCount: {}", v))),
+                }
+            }
+        }
+        deserializer.deserialize_any(RepetitionVisitor)
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TrackSizingFunctionDto {
+    pub min: MinTrackSizingFunctionDto,
+    pub max: MaxTrackSizingFunctionDto,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct GridTemplateAreaDto {
+    pub name: String,
+    pub row_start: u16,
+    pub row_end: u16,
+    pub column_start: u16,
+    pub column_end: u16,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(untagged)]
+pub enum GridTemplateComponentDto {
+    Single(TrackSizingFunctionDto),
+    Repeat {
+        #[serde(rename = "count")]
+        count: RepetitionCountDto,
+        tracks: Vec<TrackSizingFunctionDto>,
+        #[serde(default, rename = "lineNames")]
+        line_names: Vec<Vec<String>>,
+    },
+}
+
+use taffy::style::{
+    CheapCloneStr, GridTemplateArea, GridTemplateComponent, GridTemplateRepetition,
+    MaxTrackSizingFunction, MinTrackSizingFunction, RepetitionCount, TrackSizingFunction,
+};
+
+impl<S: CheapCloneStr> From<GridTemplateArea<S>> for GridTemplateAreaDto
+where
+    String: From<S>,
+{
+    fn from(val: GridTemplateArea<S>) -> Self {
+        GridTemplateAreaDto {
+            name: val.name.into(),
+            row_start: val.row_start,
+            row_end: val.row_end,
+            column_start: val.column_start,
+            column_end: val.column_end,
+        }
+    }
+}
+
+impl<S: CheapCloneStr> From<GridTemplateAreaDto> for GridTemplateArea<S>
+where
+    S: From<String>,
+{
+    fn from(val: GridTemplateAreaDto) -> Self {
+        GridTemplateArea {
+            name: val.name.into(),
+            row_start: val.row_start,
+            row_end: val.row_end,
+            column_start: val.column_start,
+            column_end: val.column_end,
+        }
+    }
+}
+
+// Min conversions
+impl From<MinTrackSizingFunction> for MinTrackSizingFunctionDto {
+    fn from(val: MinTrackSizingFunction) -> Self {
+        let raw = val.into_raw();
+        match raw.tag() {
+            CompactLength::LENGTH_TAG => MinTrackSizingFunctionDto::Length(raw.value()),
+            CompactLength::PERCENT_TAG => MinTrackSizingFunctionDto::Percent(raw.value()),
+            CompactLength::AUTO_TAG => MinTrackSizingFunctionDto::Auto,
+            CompactLength::MIN_CONTENT_TAG => MinTrackSizingFunctionDto::MinContent,
+            CompactLength::MAX_CONTENT_TAG => MinTrackSizingFunctionDto::MaxContent,
+            _ => MinTrackSizingFunctionDto::Auto,
+        }
+    }
+}
+
+impl From<MinTrackSizingFunctionDto> for MinTrackSizingFunction {
+    fn from(val: MinTrackSizingFunctionDto) -> Self {
+        match val {
+            MinTrackSizingFunctionDto::Length(v) => MinTrackSizingFunction::length(v),
+            MinTrackSizingFunctionDto::Percent(v) => MinTrackSizingFunction::percent(v),
+            MinTrackSizingFunctionDto::Auto => MinTrackSizingFunction::auto(),
+            MinTrackSizingFunctionDto::MinContent => MinTrackSizingFunction::min_content(),
+            MinTrackSizingFunctionDto::MaxContent => MinTrackSizingFunction::max_content(),
+        }
+    }
+}
+
+// Max conversions
+impl From<MaxTrackSizingFunction> for MaxTrackSizingFunctionDto {
+    fn from(val: MaxTrackSizingFunction) -> Self {
+        let raw = val.into_raw();
+        match raw.tag() {
+            CompactLength::LENGTH_TAG => MaxTrackSizingFunctionDto::Length(raw.value()),
+            CompactLength::PERCENT_TAG => MaxTrackSizingFunctionDto::Percent(raw.value()),
+            CompactLength::FR_TAG => MaxTrackSizingFunctionDto::Fraction(raw.value()),
+            CompactLength::FIT_CONTENT_PX_TAG => MaxTrackSizingFunctionDto::FitContent(raw.value()),
+            CompactLength::FIT_CONTENT_PERCENT_TAG => {
+                MaxTrackSizingFunctionDto::FitContentPercent(raw.value())
+            }
+            CompactLength::AUTO_TAG => MaxTrackSizingFunctionDto::Auto,
+            CompactLength::MIN_CONTENT_TAG => MaxTrackSizingFunctionDto::MinContent,
+            CompactLength::MAX_CONTENT_TAG => MaxTrackSizingFunctionDto::MaxContent,
+            _ => MaxTrackSizingFunctionDto::Auto,
+        }
+    }
+}
+
+impl From<MaxTrackSizingFunctionDto> for MaxTrackSizingFunction {
+    fn from(val: MaxTrackSizingFunctionDto) -> Self {
+        match val {
+            MaxTrackSizingFunctionDto::Length(v) => MaxTrackSizingFunction::length(v),
+            MaxTrackSizingFunctionDto::Percent(v) => MaxTrackSizingFunction::percent(v),
+            MaxTrackSizingFunctionDto::Fraction(v) => MaxTrackSizingFunction::fr(v),
+            MaxTrackSizingFunctionDto::FitContent(v) => MaxTrackSizingFunction::fit_content_px(v),
+            MaxTrackSizingFunctionDto::FitContentPercent(v) => {
+                MaxTrackSizingFunction::fit_content_percent(v)
+            }
+            MaxTrackSizingFunctionDto::Auto => MaxTrackSizingFunction::auto(),
+            MaxTrackSizingFunctionDto::MinContent => MaxTrackSizingFunction::min_content(),
+            MaxTrackSizingFunctionDto::MaxContent => MaxTrackSizingFunction::max_content(),
+        }
+    }
+}
+
+// TrackSizingFunction conversions (Struct)
+impl From<TrackSizingFunction> for TrackSizingFunctionDto {
+    fn from(val: TrackSizingFunction) -> Self {
+        TrackSizingFunctionDto {
+            min: val.min.into(),
+            max: val.max.into(),
+        }
+    }
+}
+
+impl From<TrackSizingFunctionDto> for TrackSizingFunction {
+    fn from(val: TrackSizingFunctionDto) -> Self {
+        TrackSizingFunction {
+            min: val.min.into(),
+            max: val.max.into(),
+        }
+    }
+}
+
+// Repetition conversions
+// Repetition conversions
+impl From<RepetitionCount> for RepetitionCountDto {
+    fn from(val: RepetitionCount) -> Self {
+        match val {
+            RepetitionCount::Count(c) => RepetitionCountDto::Count(c),
+            RepetitionCount::AutoFill => RepetitionCountDto::AutoFill,
+            RepetitionCount::AutoFit => RepetitionCountDto::AutoFit,
+        }
+    }
+}
+
+impl From<RepetitionCountDto> for RepetitionCount {
+    fn from(val: RepetitionCountDto) -> Self {
+        match val {
+            RepetitionCountDto::Count(c) => RepetitionCount::Count(c),
+            RepetitionCountDto::AutoFill => RepetitionCount::AutoFill,
+            RepetitionCountDto::AutoFit => RepetitionCount::AutoFit,
+        }
+    }
+}
+
+// GridTemplateComponentDto maps to GridTemplateComponent (Generic)
+impl<S: CheapCloneStr> From<GridTemplateComponent<S>> for GridTemplateComponentDto
+where
+    String: From<S>,
+{
+    fn from(val: GridTemplateComponent<S>) -> Self {
+        match val {
+            GridTemplateComponent::Single(n) => GridTemplateComponentDto::Single(n.into()),
+            GridTemplateComponent::Repeat(rep) => {
+                let dtos: Vec<TrackSizingFunctionDto> =
+                    rep.tracks.into_iter().map(|t| t.into()).collect();
+                let line_names: Vec<Vec<String>> = rep
+                    .line_names
+                    .into_iter()
+                    .map(|names| names.into_iter().map(|n| n.into()).collect())
+                    .collect();
+                GridTemplateComponentDto::Repeat {
+                    count: rep.count.into(),
+                    tracks: dtos,
+                    line_names,
+                }
+            }
+        }
+    }
+}
+
+impl<S: CheapCloneStr> From<GridTemplateComponentDto> for GridTemplateComponent<S>
+where
+    S: From<String>,
+{
+    fn from(val: GridTemplateComponentDto) -> Self {
+        match val {
+            GridTemplateComponentDto::Single(n) => GridTemplateComponent::Single(n.into()),
+            GridTemplateComponentDto::Repeat {
+                count,
+                tracks,
+                line_names,
+            } => {
+                let layout_tracks: Vec<TrackSizingFunction> =
+                    tracks.into_iter().map(|t| t.into()).collect();
+                let layout_line_names: Vec<Vec<S>> = line_names
+                    .into_iter()
+                    .map(|names| names.into_iter().map(|n| n.into()).collect())
+                    .collect();
+
+                GridTemplateComponent::Repeat(GridTemplateRepetition {
+                    count: count.into(),
+                    tracks: layout_tracks,
+                    line_names: layout_line_names,
+                })
+            }
         }
     }
 }

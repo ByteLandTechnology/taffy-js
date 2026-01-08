@@ -14,8 +14,9 @@ This corresponds to the CSS `box-sizing` property.
 ## Example
 
 ```typescript
-import { BoxSizing } from "taffy-js";
+import { Style, BoxSizing } from "taffy-js";
 
+const style = new Style();
 style.boxSizing = BoxSizing.BorderBox; // Size includes padding and border
 style.boxSizing = BoxSizing.ContentBox; // Size is content only
 ```

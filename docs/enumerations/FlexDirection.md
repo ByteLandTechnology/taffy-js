@@ -14,8 +14,9 @@ Defines the main axis direction for flex item layout. This corresponds to the CS
 ## Example
 
 ```typescript
-import { FlexDirection } from "taffy-js";
+import { Style, FlexDirection } from "taffy-js";
 
+const style = new Style();
 style.flexDirection = FlexDirection.Row; // Horizontal, left to right
 style.flexDirection = FlexDirection.Column; // Vertical, top to bottom
 ```

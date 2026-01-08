@@ -4,7 +4,15 @@
 
 [Taffy-JS API Documentation](../index.md) / DetailedGridInfo
 
-# Interface: DetailedGridInfo
+# Type Alias: DetailedGridInfo
+
+```ts
+type DetailedGridInfo = {
+  columns: DetailedGridTracksInfo;
+  items: DetailedGridItemsInfo[];
+  rows: DetailedGridTracksInfo;
+};
+```
 
 Detailed information about a grid layout.
 

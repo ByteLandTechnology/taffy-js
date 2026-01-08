@@ -7,7 +7,7 @@
 # Type Alias: DetailedLayoutInfo
 
 ```ts
-type DetailedLayoutInfo = DetailedGridInfo | null;
+type DetailedLayoutInfo = DetailedGridInfo | undefined;
 ```
 
 Detailed layout information (for grid layouts).
@@ -22,12 +22,24 @@ This is only available when the `detailed_layout_info` feature is enabled.
 ## Example
 
 ```typescript
-import type { DetailedLayoutInfo, DetailedGridInfo } from "taffy-js";
+import {
+  TaffyTree,
+  Style,
+  Display,
+  type DetailedLayoutInfo,
+  type DetailedGridInfo,
+} from "taffy-js";
+
+const tree = new TaffyTree();
+const style = new Style();
+style.display = Display.Grid;
+const gridNode = tree.newLeaf(style);
+tree.computeLayout(gridNode, { width: 100, height: 100 });
 
 const info: DetailedLayoutInfo = tree.detailedLayoutInfo(gridNode);
 
-if (info !== "None" && typeof info === "object" && "Grid" in info) {
-  const grid: DetailedGridInfo = info.Grid;
+if (info && typeof info === "object" && "Grid" in info) {
+  const grid = info.Grid as DetailedGridInfo;
   console.log("Rows:", grid.rows.sizes);
   console.log("Columns:", grid.columns.sizes);
 }

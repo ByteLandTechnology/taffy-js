@@ -14,8 +14,9 @@ This corresponds to the CSS `overflow` property.
 ## Example
 
 ```typescript
-import { Overflow } from "taffy-js";
+import { Style, Overflow } from "taffy-js";
 
+const style = new Style();
 style.overflow = { x: Overflow.Hidden, y: Overflow.Scroll };
 ```
 

@@ -85,10 +85,14 @@
 //! @example
 //! ```typescript
 //! try {
+//!   const tree = new TaffyTree();
+//!   const style = new Style();
 //!   const nodeId = tree.newLeaf(style);
 //!   console.log('Created node:', nodeId);
-//! } catch (error) {
-//!   console.error('Error:', error.message);
+//! } catch (e) {
+//!   if (e instanceof TaffyError) {
+//!     console.error('Error:', e.message);
+//!   }
 //! }
 //! ```
 
@@ -96,6 +100,7 @@ use crate::error::{JsTaffyError, map_bool_result, map_node_result, map_void_resu
 use crate::layout::JsLayout;
 use crate::style::JsStyle;
 use crate::types::{AvailableSizeDto, JsAvailableSizeArg, JsMeasureFunctionArg};
+use crate::{DetailedGridInfoDto, DetailedGridItemsInfoDto, DetailedGridTracksInfoDto};
 
 use taffy::TaffyError as NativeTaffyError;
 use taffy::TaffyTree;
@@ -176,6 +181,7 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
     /// tree.enableRounding();
     /// ```
     #[wasm_bindgen(js_name = enableRounding)]
@@ -191,6 +197,8 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const node = tree.newLeaf(new Style());
     /// tree.disableRounding();
     /// const layout = tree.getLayout(node);
     /// console.log(layout.x);
@@ -215,6 +223,7 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
     /// const style = new Style();
     /// style.size = { width: 100, height: 50 };
     /// const nodeId: bigint = tree.newLeaf(style);
@@ -239,6 +248,7 @@ impl JsTaffyTree {
     /// ```typescript
     /// interface TextContext { text: string; isBold: boolean; }
     ///
+    /// const tree = new TaffyTree();
     /// const style = new Style();
     /// const context: TextContext = { text: "Hello, World!", isBold: true };
     /// const nodeId: bigint = tree.newLeafWithContext(style, context);
@@ -269,6 +279,7 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
     /// const containerStyle = new Style();
     /// containerStyle.display = Display.Flex;
     ///
@@ -304,6 +315,7 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
     /// tree.clear();
     /// console.log(tree.totalNodeCount());
     /// ```
@@ -325,6 +337,8 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const nodeId = tree.newLeaf(new Style());
     /// try {
     ///   const removedId: bigint = tree.remove(nodeId);
     /// } catch (e) {
@@ -352,6 +366,8 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const nodeId = tree.newLeaf(new Style());
     /// interface Context { text: string };
     /// tree.setNodeContext(nodeId, { text: "Updated text" } as Context);
     /// ```
@@ -371,6 +387,8 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const nodeId = tree.newLeaf(new Style());
     /// interface Context { text: string };
     /// const context = tree.getNodeContext(nodeId) as Context | undefined;
     /// if (context) {
@@ -412,6 +430,9 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const id1 = tree.newLeaf(new Style());
+    /// const id2 = tree.newLeaf(new Style());
     /// const nodes = BigUint64Array.from([id1, id2]);
     /// const contexts = tree.getDisjointNodeContextMut(nodes);
     /// ```
@@ -445,6 +466,9 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const parentId = tree.newLeaf(new Style());
+    /// const childId = tree.newLeaf(new Style());
     /// tree.addChild(parentId, childId);
     /// ```
     #[wasm_bindgen(js_name = addChild)]
@@ -465,6 +489,9 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const parentId = tree.newLeaf(new Style());
+    /// const childId = tree.newLeaf(new Style());
     /// tree.insertChildAtIndex(parentId, 0, childId);
     /// ```
     #[wasm_bindgen(js_name = insertChildAtIndex)]
@@ -492,6 +519,11 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const parentId = tree.newLeaf(new Style());
+    /// const child1 = tree.newLeaf(new Style());
+    /// const child2 = tree.newLeaf(new Style());
+    /// const child3 = tree.newLeaf(new Style());
     /// const children = BigUint64Array.from([child1, child2, child3]);
     /// tree.setChildren(parentId, children);
     /// ```
@@ -512,6 +544,10 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const parentId = tree.newLeaf(new Style());
+    /// const childId = tree.newLeaf(new Style());
+    /// tree.addChild(parentId, childId);
     /// tree.removeChild(parentId, childId);
     /// ```
     #[wasm_bindgen(js_name = removeChild)]
@@ -533,6 +569,10 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const parentId = tree.newLeaf(new Style());
+    /// const childId = tree.newLeaf(new Style());
+    /// tree.addChild(parentId, childId);
     /// const removedId: bigint = tree.removeChildAtIndex(parentId, 0);
     /// ```
     #[wasm_bindgen(js_name = removeChildAtIndex)]
@@ -544,7 +584,7 @@ impl JsTaffyTree {
     ///
     /// @param parent - The parent node ID
     /// @param index - The index of the child to replace (0-based)
-    /// @param new_child - The new child node ID
+    /// @param newChild - The new child node ID
     ///
     /// @returns - The replaced (old) child ID (`bigint`)
     ///
@@ -552,6 +592,14 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const parentId = tree.newLeaf(new Style());
+    /// const oldChild = tree.newLeaf(new Style());
+    /// const newChildId = tree.newLeaf(new Style());
+    /// tree.addChild(parentId, oldChild);
+    /// const child = tree.newLeaf(new Style()); // filler child at index 0 if needed, but index 1 implies 2 children
+    /// tree.insertChildAtIndex(parentId, 0, child);
+    ///
     /// const oldChildId: bigint = tree.replaceChildAtIndex(parentId, 1, newChildId);
     /// ```
     #[wasm_bindgen(js_name = replaceChildAtIndex)]
@@ -559,7 +607,7 @@ impl JsTaffyTree {
         &mut self,
         parent: u64,
         index: usize,
-        new_child: u64,
+        #[wasm_bindgen(js_name = "newChild")] new_child: u64,
     ) -> Result<u64, JsValue> {
         map_node_result(self.tree.replace_child_at_index(
             NodeId::from(parent),
@@ -579,6 +627,10 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const parentId = tree.newLeaf(new Style());
+    /// const childId = tree.newLeaf(new Style());
+    /// tree.addChild(parentId, childId);
     /// const firstChild: bigint = tree.getChildAtIndex(parentId, 0);
     /// ```
     #[wasm_bindgen(js_name = getChildAtIndex)]
@@ -591,21 +643,28 @@ impl JsTaffyTree {
     /// Removes children from `start_index` (inclusive) to `end_index` (exclusive).
     ///
     /// @param parent - The parent node ID
-    /// @param start_index - Start of range (inclusive)
-    /// @param end_index - End of range (exclusive)
+    /// @param startIndex - Start of range (inclusive)
+    /// @param endIndex - End of range (exclusive)
     ///
     /// @throws `TaffyError` if the parent node does not exist or range is invalid
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const parentId = tree.newLeaf(new Style());
+    /// const child1 = tree.newLeaf(new Style());
+    /// const child2 = tree.newLeaf(new Style());
+    /// const child3 = tree.newLeaf(new Style());
+    /// tree.setChildren(parentId, BigUint64Array.from([child1, child2, child3]));
+    ///
     /// tree.removeChildrenRange(parentId, 1, 3);
     /// ```
     #[wasm_bindgen(js_name = removeChildrenRange)]
     pub fn remove_children_range(
         &mut self,
         parent: u64,
-        start_index: usize,
-        end_index: usize,
+        #[wasm_bindgen(js_name = "startIndex")] start_index: usize,
+        #[wasm_bindgen(js_name = "endIndex")] end_index: usize,
     ) -> Result<(), JsValue> {
         map_void_result(
             self.tree
@@ -619,6 +678,7 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
     /// const count: number = tree.totalNodeCount();
     /// ```
     #[wasm_bindgen(js_name = totalNodeCount)]
@@ -636,6 +696,8 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const parentId = tree.newLeaf(new Style());
     /// const count: number = tree.childCount(parentId);
     /// ```
     #[wasm_bindgen(js_name = childCount)]
@@ -651,7 +713,11 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
-    /// const parentId: bigint | undefined = tree.parent(childId);
+    /// const tree = new TaffyTree();
+    /// const parentId = tree.newLeaf(new Style());
+    /// const childId = tree.newLeaf(new Style());
+    /// tree.addChild(parentId, childId);
+    /// const parent: bigint | undefined = tree.parent(childId);
     /// ```
     #[wasm_bindgen(js_name = parent)]
     pub fn parent(&self, child: u64) -> Option<u64> {
@@ -668,6 +734,8 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const parentId = tree.newLeaf(new Style());
     /// const children: BigUint64Array = tree.children(parentId);
     /// ```
     #[wasm_bindgen(js_name = children)]
@@ -694,6 +762,8 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const nodeId = tree.newLeaf(new Style());
     /// const newStyle = new Style();
     /// newStyle.flexGrow = 2;
     /// tree.setStyle(nodeId, newStyle);
@@ -713,6 +783,8 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const nodeId = tree.newLeaf(new Style());
     /// const style: Style = tree.getStyle(nodeId);
     /// console.log('Flex grow:', style.flexGrow);
     /// ```
@@ -741,6 +813,12 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const style = new Style();
+    /// style.size = { width: 100, height: 100 };
+    /// const rootId = tree.newLeaf(style);
+    /// const nodeId = rootId;
+    ///
     /// tree.computeLayout(rootId, { width: 800, height: 600 });
     /// const layout: Layout = tree.getLayout(nodeId);
     /// console.log(`Position: (${layout.x}, ${layout.y}), Size: ${layout.width}x${layout.height}`);
@@ -764,6 +842,8 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const nodeId = tree.newLeaf(new Style());
     /// const layout: Layout = tree.unroundedLayout(nodeId);
     /// console.log(`Exact width: ${layout.width}`);
     /// ```
@@ -835,6 +915,11 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const rootId = tree.newLeaf(new Style());
+    /// const nodeId = rootId;
+    /// const availableSpace = { width: 100, height: 100 };
+    ///
     /// // After updating text content
     /// tree.setNodeContext(nodeId, { text: "Updated text" });
     /// tree.markDirty(nodeId);
@@ -858,6 +943,11 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const rootId = tree.newLeaf(new Style());
+    /// const nodeId = rootId;
+    /// const availableSpace = { width: 100, height: 100 };
+    ///
     /// if (tree.dirty(nodeId)) {
     ///   tree.computeLayout(rootId, availableSpace);
     /// }
@@ -878,19 +968,24 @@ impl JsTaffyTree {
     /// called for each leaf node that needs measurement.
     ///
     /// @param node - The root node ID to compute layout for
-    /// @param available_space - The available space constraints
-    /// @param measure_func - A function that measures leaf node content
+    /// @param availableSpace - The available space constraints
+    /// @param measureFunc - A function that measures leaf node content
     ///
     /// @throws `TaffyError` if the node does not exist or available space is invalid
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const rootId = tree.newLeaf(new Style());
+    ///
+    /// const measureText = (text: string, width: number) => ({ width: 0, height: 0 });
+    ///
     /// tree.computeLayoutWithMeasure(
     ///   rootId,
-    ///   { width: 800, height: "maxContent" },
+    ///   { width: 800, height: "max-content" },
     ///   (known, available, node, context, style) => {
     ///     if (context?.text) {
-    ///       const measured = measureText(context.text, available.width);
+    ///       const measured = measureText(context.text, available.width as number);
     ///       return { width: measured.width, height: measured.height };
     ///     }
     ///     return { width: 0, height: 0 };
@@ -901,8 +996,8 @@ impl JsTaffyTree {
     pub fn compute_layout_with_measure(
         &mut self,
         node: u64,
-        available_space: JsAvailableSizeArg,
-        measure_func: JsMeasureFunctionArg,
+        #[wasm_bindgen(js_name = "availableSpace")] available_space: JsAvailableSizeArg,
+        #[wasm_bindgen(js_name = "measureFunc")] measure_func: JsMeasureFunctionArg,
     ) -> Result<(), JsValue> {
         let js_value: JsValue = available_space.unchecked_into();
         let js_space = match serde_wasm_bindgen::from_value::<AvailableSizeDto>(js_value) {
@@ -959,31 +1054,36 @@ impl JsTaffyTree {
     /// to compute layouts for all nodes in the tree.
     ///
     /// @param node - The root node ID to compute layout for
-    /// @param available_space - The available space constraints
+    /// @param availableSpace - The available space constraints
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const rootId = tree.newLeaf(new Style());
+    ///
     /// // Fixed size container
-    /// { width: 800, height: 600 }
+    /// tree.computeLayout(rootId, { width: 800, height: 600 });
     ///
     /// // Flexible width, fixed height
-    /// { width: "maxContent", height: 600 }
+    /// tree.computeLayout(rootId, { width: "max-content", height: 600 });
     ///
     /// // Minimum content size
-    /// { width: "minContent", height: "minContent" }
+    /// tree.computeLayout(rootId, { width: "min-content", height: "min-content" });
     /// ```
     ///
     /// @throws `TaffyError` if the node does not exist or available space is invalid
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const rootId = tree.newLeaf(new Style());
     /// tree.computeLayout(rootId, { width: 800, height: 600 });
     /// ```
     #[wasm_bindgen(js_name = computeLayout)]
     pub fn compute_layout(
         &mut self,
         node: u64,
-        available_space: JsAvailableSizeArg,
+        #[wasm_bindgen(js_name = "availableSpace")] available_space: JsAvailableSizeArg,
     ) -> Result<(), JsValue> {
         let js_value: JsValue = available_space.unchecked_into();
         match serde_wasm_bindgen::from_value::<AvailableSizeDto>(js_value) {
@@ -1010,6 +1110,8 @@ impl JsTaffyTree {
     ///
     /// @example
     /// ```typescript
+    /// const tree = new TaffyTree();
+    /// const rootId = tree.newLeaf(new Style());
     /// tree.printTree(rootId);
     /// // Output appears in browser console
     /// ```

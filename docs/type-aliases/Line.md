@@ -4,7 +4,14 @@
 
 [Taffy-JS API Documentation](../index.md) / Line
 
-# Interface: Line\<T\>
+# Type Alias: Line\<T\>
+
+```ts
+type Line<T> = {
+  end: T;
+  start: T;
+};
+```
 
 Line type representing start and end positions.
 

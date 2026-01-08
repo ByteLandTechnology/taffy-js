@@ -14,6 +14,11 @@ to all computed layout values. All dimensions are in pixels.
 ## Example
 
 ```typescript
+const tree = new TaffyTree();
+const rootId = tree.newLeaf(new Style());
+const node = rootId;
+
+tree.computeLayout(rootId, { width: 800, height: 600 });
 const layout = tree.getLayout(node);
 
 console.log("Position:", layout.x, layout.y);

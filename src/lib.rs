@@ -35,7 +35,7 @@
 //! style.flexDirection = FlexDirection.Column;
 //!
 //! const root = tree.newLeaf(style);
-//! tree.computeLayout(root, { width: "maxContent", height: "maxContent" });
+//! tree.computeLayout(root, { width: "max-content", height: "max-content" });
 //!
 //! const layout = tree.getLayout(root);
 //! console.log(`Width: ${layout.width}, Height: ${layout.height}`);

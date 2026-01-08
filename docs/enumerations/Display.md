@@ -14,8 +14,9 @@ and determines how an element and its children are laid out.
 ## Example
 
 ```typescript
-import { Display } from "taffy-js";
+import { Style, Display } from "taffy-js";
 
+const style = new Style();
 style.display = Display.Flex; // Enable flexbox layout
 style.display = Display.Grid; // Enable grid layout
 style.display = Display.None; // Hide element from layout

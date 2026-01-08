@@ -14,8 +14,9 @@ This corresponds to the CSS `flex-wrap` property.
 ## Example
 
 ```typescript
-import { FlexWrap } from "taffy-js";
+import { Style, FlexWrap } from "taffy-js";
 
+const style = new Style();
 style.flexWrap = FlexWrap.NoWrap; // All items on single line
 style.flexWrap = FlexWrap.Wrap; // Items wrap to new lines
 ```

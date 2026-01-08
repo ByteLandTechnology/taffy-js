@@ -32,52 +32,48 @@ import {
   AlignItems,
 } from "taffy-js";
 
-async function main() {
-  // Initialize WebAssembly module
-  await loadTaffy();
+// Initialize WebAssembly module
+await loadTaffy();
 
-  // Create a layout tree
-  const tree = new TaffyTree();
+// Create a layout tree
+const tree = new TaffyTree();
 
-  // Create container style
-  const containerStyle = new Style();
-  containerStyle.display = Display.Flex;
-  containerStyle.flexDirection = FlexDirection.Column;
-  containerStyle.alignItems = AlignItems.Center;
-  containerStyle.size = { width: 300, height: 200 };
-  containerStyle.padding = { left: 10, right: 10, top: 10, bottom: 10 };
+// Create container style
+const containerStyle = new Style();
+containerStyle.display = Display.Flex;
+containerStyle.flexDirection = FlexDirection.Column;
+containerStyle.alignItems = AlignItems.Center;
+containerStyle.size = { width: 300, height: 200 };
+containerStyle.padding = { left: 10, right: 10, top: 10, bottom: 10 };
 
-  // Create child styles
-  const childStyle = new Style();
-  childStyle.flexGrow = 1;
-  childStyle.size = { width: "100%", height: "auto" };
+// Create child styles
+const childStyle = new Style();
+childStyle.flexGrow = 1;
+childStyle.size = { width: "100%", height: "auto" };
 
-  // Create nodes
-  const child1 = tree.newLeaf(childStyle);
-  const child2 = tree.newLeaf(childStyle);
-  const container = tree.newWithChildren(
-    containerStyle,
-    BigUint64Array.from([child1, child2]),
-  );
+// Create nodes
+const child1 = tree.newLeaf(childStyle);
+const child2 = tree.newLeaf(childStyle);
+const container = tree.newWithChildren(
+  containerStyle,
+  BigUint64Array.from([child1, child2]),
+);
 
-  // Compute layout
-  tree.computeLayout(container, { width: 300, height: 200 });
+// Compute layout
+tree.computeLayout(container, { width: 300, height: 200 });
 
-  // Read computed layouts
-  const containerLayout = tree.getLayout(container);
-  const child1Layout = tree.getLayout(child1);
-  const child2Layout = tree.getLayout(child2);
+// Read computed layouts
+const containerLayout = tree.getLayout(container);
+const child1Layout = tree.getLayout(child1);
+const child2Layout = tree.getLayout(child2);
 
-  console.log(`Container: ${containerLayout.width}x${containerLayout.height}`);
-  console.log(
-    `Child 1: ${child1Layout.width}x${child1Layout.height} at (${child1Layout.x}, ${child1Layout.y})`,
-  );
-  console.log(
-    `Child 2: ${child2Layout.width}x${child2Layout.height} at (${child2Layout.x}, ${child2Layout.y})`,
-  );
-}
-
-main();
+console.log(`Container: ${containerLayout.width}x${containerLayout.height}`);
+console.log(
+  `Child 1: ${child1Layout.width}x${child1Layout.height} at (${child1Layout.x}, ${child1Layout.y})`,
+);
+console.log(
+  `Child 2: ${child2Layout.width}x${child2Layout.height} at (${child2Layout.x}, ${child2Layout.y})`,
+);
 ```
 
 ## 📖 API Reference
@@ -86,322 +82,49 @@ main();
 
 The main class for managing layout trees.
 
-```typescript
-class TaffyTree {
-  // Construction
-  constructor();
-  static withCapacity(capacity: number): TaffyTree;
-
-  // Node Creation (throws TaffyError on failure)
-  newLeaf(style: Style): bigint;
-  newLeafWithContext(style: Style, context: any): bigint;
-  newWithChildren(style: Style, children: BigUint64Array): bigint;
-
-  // Tree Operations
-  clear(): void;
-  remove(node: bigint): bigint; // throws TaffyError
-  totalNodeCount(): number;
-
-  // Child Management (throws TaffyError on failure)
-  addChild(parent: bigint, child: bigint): void;
-  removeChild(parent: bigint, child: bigint): bigint;
-  setChildren(parent: bigint, children: BigUint64Array): void;
-  children(parent: bigint): BigUint64Array;
-  childCount(parent: bigint): number;
-  parent(child: bigint): bigint | undefined;
-
-  // Style Management (throws TaffyError on failure)
-  setStyle(node: bigint, style: Style): void;
-  getStyle(node: bigint): Style;
-
-  // Layout Computation (throws TaffyError on failure)
-  computeLayout(node: bigint, availableSpace: Size<AvailableSpace>): void;
-  computeLayoutWithMeasure(
-    node: bigint,
-    availableSpace: Size<AvailableSpace>,
-    measureFunc: MeasureFunction,
-  ): void;
-
-  // Layout Results (throws TaffyError on failure)
-  getLayout(node: bigint): Layout;
-  unroundedLayout(node: bigint): Layout;
-
-  // Dirty Tracking (throws TaffyError on failure)
-  markDirty(node: bigint): void;
-  dirty(node: bigint): boolean;
-
-  // Configuration
-  enableRounding(): void;
-  disableRounding(): void;
-}
-```
+[View Documentation](https://github.com/ByteLandTechnology/taffy-js/blob/main/docs/classes/TaffyTree.md)
 
 ### Style
 
 Configuration object for node layout properties.
 
-```typescript
-class Style {
-  constructor();
-
-  // Layout Mode
-  display: Display; // Block, Flex, Grid, None
-  position: Position; // Relative, Absolute
-  boxSizing: BoxSizing; // BorderBox, ContentBox
-  overflow: Point<Overflow>; // Overflow handling
-
-  // Flexbox Properties
-  flexDirection: FlexDirection; // Row, Column, RowReverse, ColumnReverse
-  flexWrap: FlexWrap; // NoWrap, Wrap, WrapReverse
-  flexGrow: number; // Growth factor (default: 0)
-  flexShrink: number; // Shrink factor (default: 1)
-  flexBasis: Dimension; // Initial size
-
-  // Alignment Properties
-  alignItems: AlignItems | undefined;
-  alignSelf: AlignSelf | undefined;
-  alignContent: AlignContent | undefined;
-  justifyContent: JustifyContent | undefined;
-  justifyItems: AlignItems | undefined; // Grid container default justify
-  justifySelf: AlignSelf | undefined; // Grid item self-justify
-
-  // Sizing
-  size: Size<Dimension>; // Width and height
-  minSize: Size<Dimension>; // Minimum constraints
-  maxSize: Size<Dimension>; // Maximum constraints
-  aspectRatio: number | undefined; // Width/height ratio
-
-  // Spacing
-  margin: Rect<LengthPercentageAuto>;
-  padding: Rect<LengthPercentage>;
-  border: Rect<LengthPercentage>;
-  gap: Size<LengthPercentage>; // Row and column gap
-  inset: Rect<LengthPercentageAuto>; // For absolute positioning
-
-  // Block Layout Properties
-  itemIsTable: boolean; // Is this a table element?
-  itemIsReplaced: boolean; // Is this a replaced element (img, video)?
-  textAlign: TextAlign; // Legacy text alignment
-  scrollbarWidth: number; // Scrollbar gutter width in pixels
-
-  // CSS Grid Container Properties
-  gridAutoFlow: GridAutoFlow; // Row, Column, RowDense, ColumnDense
-  gridTemplateRows: GridTrack[]; // Track sizing for rows
-  gridTemplateColumns: GridTrack[]; // Track sizing for columns
-  gridAutoRows: TrackSizing[]; // Size for implicit rows
-  gridAutoColumns: TrackSizing[]; // Size for implicit columns
-  gridTemplateAreas: GridArea[]; // Named grid areas
-  gridTemplateRowNames: string[][]; // Named lines between rows
-  gridTemplateColumnNames: string[][]; // Named lines between columns
-
-  // CSS Grid Item Properties
-  gridRow: Line<GridPlacement>; // grid-row (start/end)
-  gridColumn: Line<GridPlacement>; // grid-column (start/end)
-}
-```
+[View Documentation](https://github.com/ByteLandTechnology/taffy-js/blob/main/docs/classes/Style.md)
 
 ### Layout
 
 Read-only computed layout result.
 
-```typescript
-class Layout {
-  // Position (relative to parent)
-  readonly x: number;
-  readonly y: number;
-
-  // Size
-  readonly width: number;
-  readonly height: number;
-
-  // Content size (for scrollable content)
-  readonly contentWidth: number;
-  readonly contentHeight: number;
-
-  // Spacing
-  readonly paddingTop: number;
-  readonly paddingRight: number;
-  readonly paddingBottom: number;
-  readonly paddingLeft: number;
-
-  readonly borderTop: number;
-  readonly borderRight: number;
-  readonly borderBottom: number;
-  readonly borderLeft: number;
-
-  readonly marginTop: number;
-  readonly marginRight: number;
-  readonly marginBottom: number;
-  readonly marginLeft: number;
-
-  // Scrollbars
-  readonly scrollbarWidth: number;
-  readonly scrollbarHeight: number;
-
-  // Rendering order
-  readonly order: number;
-}
-```
+[View Documentation](https://github.com/ByteLandTechnology/taffy-js/blob/main/docs/classes/Layout.md)
 
 ### Enums
 
-```typescript
-enum Display {
-  Block,
-  Flex,
-  Grid,
-  None,
-}
-enum Position {
-  Relative,
-  Absolute,
-}
-enum FlexDirection {
-  Row,
-  Column,
-  RowReverse,
-  ColumnReverse,
-}
-enum FlexWrap {
-  NoWrap,
-  Wrap,
-  WrapReverse,
-}
-enum AlignItems {
-  Start,
-  End,
-  FlexStart,
-  FlexEnd,
-  Center,
-  Baseline,
-  Stretch,
-}
-enum AlignSelf {
-  Auto,
-  Start,
-  End,
-  FlexStart,
-  FlexEnd,
-  Center,
-  Baseline,
-  Stretch,
-}
-enum AlignContent {
-  Start,
-  End,
-  FlexStart,
-  FlexEnd,
-  Center,
-  Stretch,
-  SpaceBetween,
-  SpaceAround,
-  SpaceEvenly,
-}
-enum JustifyContent {
-  Start,
-  End,
-  FlexStart,
-  FlexEnd,
-  Center,
-  Stretch,
-  SpaceBetween,
-  SpaceAround,
-  SpaceEvenly,
-}
-enum Overflow {
-  Visible,
-  Clip,
-  Hidden,
-  Scroll,
-}
-enum BoxSizing {
-  BorderBox,
-  ContentBox,
-}
-enum TextAlign {
-  Auto,
-  LegacyLeft,
-  LegacyRight,
-  LegacyCenter,
-}
-enum GridAutoFlow {
-  Row,
-  Column,
-  RowDense,
-  ColumnDense,
-}
-```
+[View Documentation](https://github.com/ByteLandTechnology/taffy-js/blob/main/docs/modules.md#enums)
 
 ### Types
 
-```typescript
-// Dimension values (CSS-like syntax)
-type Dimension = number | `${number}%` | "auto"; // e.g., 100, "50%", "auto"
-type LengthPercentage = number | `${number}%`; // e.g., 10, "25%"
-type LengthPercentageAuto = number | `${number}%` | "auto";
-
-// Geometry
-interface Size<T> {
-  width: T;
-  height: T;
-}
-interface Rect<T> {
-  left: T;
-  right: T;
-  top: T;
-  bottom: T;
-}
-interface Point<T> {
-  x: T;
-  y: T;
-}
-
-// Available space for layout computation
-type AvailableSpace = number | "minContent" | "maxContent";
-
-// Grid Placement (CSS grid-row-start / grid-column-start)
-type GridPlacement = "auto" | number | { span: number };
-
-// Grid Line (CSS grid-row / grid-column shorthand)
-interface Line<T> {
-  start: T;
-  end: T;
-}
-
-// Grid Template Area
-interface GridArea {
-  name: string;
-  row_start: number;
-  row_end: number;
-  column_start: number;
-  column_end: number;
-}
-
-// Measure function for custom content measurement
-type MeasureFunction = (
-  knownDimensions: Size<number | undefined>,
-  availableSpace: Size<AvailableSpace>,
-  node: bigint,
-  context: any,
-  style: Style,
-) => Size<number>;
-```
+[View Documentation](https://github.com/ByteLandTechnology/taffy-js/blob/main/docs/modules.md#type-aliases)
 
 ## 📐 Custom Text Measurement
 
 For text nodes or other content that needs dynamic measurement:
 
 ```typescript
+const tree = new TaffyTree();
+const textStyle = new Style();
+const rootNode = tree.newLeaf(new Style());
+const measureTextWidth = (text: string) => text.length * 8;
+const measureTextHeight = (text: string, width: number) => 20;
+
 const textNode = tree.newLeafWithContext(textStyle, { text: "Hello, World!" });
 
 tree.computeLayoutWithMeasure(
   rootNode,
-  { width: 800, height: "maxContent" },
+  { width: 800, height: "max-content" },
   (known, available, node, context, style) => {
     if (context?.text) {
       // Your text measurement logic here
       const width = measureTextWidth(context.text);
-      const height = measureTextHeight(context.text, available.width);
+      const height = measureTextHeight(context.text, available.width as number);
       return { width, height };
     }
     return { width: 0, height: 0 };
@@ -415,11 +138,14 @@ Methods that can fail throw a `TaffyError` as a JavaScript exception. Use try-ca
 
 ```typescript
 try {
+  const tree = new TaffyTree();
+  const style = new Style();
   const nodeId = tree.newLeaf(style);
   console.log("Created node:", nodeId);
-} catch (error) {
-  // error is a TaffyError instance
-  console.error("Error:", error.message);
+} catch (e) {
+  if (e instanceof TaffyError) {
+    console.error("Error:", e.message);
+  }
 }
 ```
 
@@ -466,10 +192,10 @@ itemStyle.gridColumn = { start: 1, end: { span: 2 } }; // Spans 2 columns
 const gridStyle = new Style();
 gridStyle.display = Display.Grid;
 gridStyle.gridTemplateAreas = [
-  { name: "header", row_start: 1, row_end: 2, column_start: 1, column_end: 4 },
-  { name: "sidebar", row_start: 2, row_end: 4, column_start: 1, column_end: 2 },
-  { name: "main", row_start: 2, row_end: 4, column_start: 2, column_end: 4 },
-  { name: "footer", row_start: 4, row_end: 5, column_start: 1, column_end: 4 },
+  { name: "header", rowStart: 1, rowEnd: 2, columnStart: 1, columnEnd: 4 },
+  { name: "sidebar", rowStart: 2, rowEnd: 4, columnStart: 1, columnEnd: 2 },
+  { name: "main", rowStart: 2, rowEnd: 4, columnStart: 2, columnEnd: 4 },
+  { name: "footer", rowStart: 4, rowEnd: 5, columnStart: 1, columnEnd: 4 },
 ];
 
 // Named grid lines

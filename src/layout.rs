@@ -12,6 +12,9 @@
 //! @example
 //! ```typescript
 //! // Compute layout first
+//! const tree = new TaffyTree();
+//! const rootNode = tree.newLeaf(new Style());
+//! const nodeId = rootNode;
 //! tree.computeLayout(rootNode, { width: 800, height: 600 });
 //!
 //! // Get layout for a specific node
@@ -44,6 +47,11 @@ use wasm_bindgen::prelude::*;
 ///
 /// @example
 /// ```typescript
+/// const tree = new TaffyTree();
+/// const rootId = tree.newLeaf(new Style());
+/// const node = rootId;
+///
+/// tree.computeLayout(rootId, { width: 800, height: 600 });
 /// const layout = tree.getLayout(node);
 ///
 /// console.log("Position:", layout.x, layout.y);

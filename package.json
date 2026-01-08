@@ -41,10 +41,11 @@
   "scripts": {
     "build": "npm run build:wasm && npm run build:ts && npm run docs",
     "build:wasm": "wasm-pack build --release --target web && rm -f pkg/.gitignore && npm run patch-dts",
-    "build:ts": "tsc",
+    "build:ts": "tsc && npm run generate:examples",
     "build:dev": "wasm-pack build --dev --target web && npm run patch-dts && npm run build:ts",
     "docs": "typedoc && prettier --write docs",
     "patch-dts": "npx tsx scripts/patch-dts.ts",
+    "generate:examples": "npx tsx scripts/generate-example-tests.ts",
     "test": "vitest run",
     "prepare": "husky"
   },

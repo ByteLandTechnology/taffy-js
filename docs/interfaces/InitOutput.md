@@ -129,6 +129,7 @@
 | <a id="taffytree_clear"></a> `taffytree_clear`                                         | `readonly` | (`a`) => `void`                                               |
 | <a id="taffytree_computelayout"></a> `taffytree_computeLayout`                         | `readonly` | (`a`, `b`, `c`) => \[`number`, `number`\]                     |
 | <a id="taffytree_computelayoutwithmeasure"></a> `taffytree_computeLayoutWithMeasure`   | `readonly` | (`a`, `b`, `c`, `d`) => \[`number`, `number`\]                |
+| <a id="taffytree_detailedlayoutinfo"></a> `taffytree_detailedLayoutInfo`               | `readonly` | (`a`, `b`) => \[`number`, `number`, `number`\]                |
 | <a id="taffytree_dirty"></a> `taffytree_dirty`                                         | `readonly` | (`a`, `b`) => \[`number`, `number`, `number`\]                |
 | <a id="taffytree_disablerounding"></a> `taffytree_disableRounding`                     | `readonly` | (`a`) => `void`                                               |
 | <a id="taffytree_enablerounding"></a> `taffytree_enableRounding`                       | `readonly` | (`a`) => `void`                                               |

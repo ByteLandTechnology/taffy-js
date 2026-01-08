@@ -14,8 +14,9 @@ Used by block layout to implement the legacy behaviour of `<center>` and
 ## Example
 
 ```typescript
-import { TextAlign } from "taffy-js";
+import { Style, TextAlign } from "taffy-js";
 
+const style = new Style();
 style.textAlign = TextAlign.LegacyCenter; // Center block children
 ```
 
